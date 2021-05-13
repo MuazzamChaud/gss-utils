@@ -14,7 +14,7 @@
             {
                 "titles": "Notation",
                 "name": "notation",
-                "atatype": {
+                "datatype": {
                     "base": "string",
                     "format": "^-?[\\w\\.\\/\\+]+(-[\\w\\.\\/\\+]+)*$"
                 },
