@@ -152,7 +152,7 @@ Feature: Create and Manage CodeList Metadata files
                         },
                         "required": false,
                         "propertyUrl": "skos:broader",
-                        "valueUrl": "http://gss-data.org.uk/def/concept/my-favourite-code-list/{parent_notation}"
+                        "valueUrl": "http://gss-data.org.uk/def/concept/my-favourite-code-list/{+parent_notation}"
                     },
                     {
                         "titles": "Sort Priority",
@@ -180,7 +180,7 @@ Feature: Create and Manage CodeList Metadata files
                     }
                 ],
                 "primaryKey": "notation",
-                "aboutUrl": "http://gss-data.org.uk/def/concept/my-favourite-code-list/{notation}"
+                "aboutUrl": "http://gss-data.org.uk/def/concept/my-favourite-code-list/{+notation}"
             },
             "prov:hadDerivation": {
                 "@id": "http://gss-data.org.uk/def/concept-scheme/my-favourite-code-list",
@@ -207,14 +207,14 @@ Feature: Create and Manage CodeList Metadata files
                 "columns": [
                     {
                         "propertyUrl": "skos:broader",
-                        "valueUrl": "http://gss-data.org.uk/def/my-favourite-family/concept/my-favourite-code-list/{parent_notation}"
+                        "valueUrl": "http://gss-data.org.uk/def/my-favourite-family/concept/my-favourite-code-list/{+parent_notation}"
                     },
                     {
                         "propertyUrl": "skos:inScheme",
                         "valueUrl": "http://gss-data.org.uk/def/my-favourite-family/concept-scheme/my-favourite-code-list"
                     }
                 ],
-                "aboutUrl": "http://gss-data.org.uk/def/my-favourite-family/concept/my-favourite-code-list/{notation}"
+                "aboutUrl": "http://gss-data.org.uk/def/my-favourite-family/concept/my-favourite-code-list/{+notation}"
             },
             "prov:hadDerivation": {
                 "@id": "http://gss-data.org.uk/def/my-favourite-family/concept-scheme/my-favourite-code-list"
@@ -245,14 +245,14 @@ Feature: Create and Manage CodeList Metadata files
                 "columns": [
                     {
                         "propertyUrl": "skos:broader",
-                        "valueUrl": "http://gss-data.org.uk/data/gss_data/my-favourite-family/almost-the-best-data-set#concept/my-favourite-code-list/{parent_notation}"
+                        "valueUrl": "http://gss-data.org.uk/data/gss_data/my-favourite-family/almost-the-best-data-set#concept/my-favourite-code-list/{+parent_notation}"
                     },
                     {
                         "propertyUrl": "skos:inScheme",
                         "valueUrl": "http://gss-data.org.uk/data/gss_data/my-favourite-family/almost-the-best-data-set#scheme/my-favourite-code-list"
                     }
                 ],
-                "aboutUrl": "http://gss-data.org.uk/data/gss_data/my-favourite-family/almost-the-best-data-set#concept/my-favourite-code-list/{notation}"
+                "aboutUrl": "http://gss-data.org.uk/data/gss_data/my-favourite-family/almost-the-best-data-set#concept/my-favourite-code-list/{+notation}"
             },
             "prov:hadDerivation": {
                 "@id": "http://gss-data.org.uk/data/gss_data/my-favourite-family/almost-the-best-data-set#scheme/my-favourite-code-list"
@@ -412,5 +412,49 @@ Scenario: Correct the "@id" when it's "#table" and we have skos:inScheme defined
       """
       {
         "@id": "http://gss-data.org.uk/def/concept-scheme/this-scheme-id"
+      }
+      """
+
+Scenario: Escape the notation URIS column templates where they haven't been escaped.
+    Given We have a metadata file of the form
+      """
+      {
+        "@context": "http://www.w3.org/ns/csvw",
+        "@id": "#table",
+        "url": "some-file.csv",
+        "tableSchema": {
+          "columns": [
+            {
+                "titles": "Notation",
+                "name": "notation",
+                "propertyUrl": "skos:notation"
+            },
+            {
+                "titles": "Parent Notation",
+                "name": "parent_notation",
+                "valueUrl": "http://gss-data.org.uk/def/concept-scheme/this-scheme-id/{parent_notation}"
+            }
+          ],
+          "aboutUrl": "http://gss-data.org.uk/def/concept-scheme/this-scheme-id/{notation}"
+        },
+        "prov:hadDerivation": {
+          "@type": "skos:ConceptScheme"
+        }
+      }
+      """
+    When We run an automatic upgrade on the metadata file
+    Then The following properties are set
+      """
+      {
+        "tableSchema": {
+          "columns": [
+            {
+                "titles": "Parent Notation",
+                "name": "parent_notation",
+                "valueUrl": "http://gss-data.org.uk/def/concept-scheme/this-scheme-id/{+parent_notation}"
+            }
+          ],
+          "aboutUrl": "http://gss-data.org.uk/def/concept-scheme/this-scheme-id/{+notation}"
+        }
       }
       """
