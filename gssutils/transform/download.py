@@ -43,7 +43,7 @@ class Downloadable(Resource):
         stream.decode_content = True
         return stream
 
-    def as_databaker(self, **kwargs) -> Union[List[xypath.Table], xypath.Table]:
+    def as_databaker(self, **kwargs) -> List[xypath.Table]:
         return self._get_simple_databaker_tabs(**kwargs)
 
     def as_pandas(self, **kwargs) -> Union[Dict[str, pd.DataFrame], pd.DataFrame]:
