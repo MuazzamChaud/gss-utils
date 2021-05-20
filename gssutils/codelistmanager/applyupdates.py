@@ -1,10 +1,12 @@
 from typing import Dict, List
 from datetime import datetime
 
+
 from .updates.dcat import ensure_dcat_metadata_populated
 from .updates.standardiselabels import standardise_labels
 from .updates.correctidiftable import correct_id_if_table
 from .config import pmdcat_base_uri
+from .updates.escape_uri_template_values import escape_uri_template_values
 
 
 def refactor_structure_with_updates(csvw_mapping: Dict, allow_human_input: bool):
@@ -55,3 +57,5 @@ def _refactor_table_mapping_with_updates(table_mapping: Dict, allow_human_input:
 
     ensure_dcat_metadata_populated(pmdcat_base_uri, allow_human_input, concept_scheme_uri,
                                    table_mapping, dt_now, catalog_label)
+
+    escape_uri_template_values(table_mapping)

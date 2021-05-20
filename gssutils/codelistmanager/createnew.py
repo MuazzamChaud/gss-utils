@@ -96,7 +96,7 @@ def generate_csvw_metadata(
     if "notation" in [c.lower() for c in column_names]:
         override(table_schema, {
             "primaryKey": "notation",
-            "aboutUrl": concept_base_uri + "/{notation}"
+            "aboutUrl": concept_base_uri + "/{+notation}"
         })
     else:
         print("WARNING: could not determine primary key. As a result, `aboutUrl` property is not specified and " +
@@ -163,7 +163,7 @@ def _generate_schema_for_column(column_name: str, concept_base_uri: str) -> Dict
             },
             "required": False,
             "propertyUrl": "skos:broader",
-            "valueUrl": concept_base_uri + "/{" + column_name_snake_case + "}"
+            "valueUrl": concept_base_uri + "/{+" + column_name_snake_case + "}"
         })
     elif column_name_lower == "sort priority":
         override(column, {
