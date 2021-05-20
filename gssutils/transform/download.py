@@ -43,10 +43,10 @@ class Downloadable(Resource):
         stream.decode_content = True
         return stream
 
-    def as_databaker(self, **kwargs):
+    def as_databaker(self, **kwargs) -> Union[list(xypath.xypath.Table), xypath.xypath.Table]:
         return self._get_simple_databaker_tabs(**kwargs)
 
-    def as_pandas(self, **kwargs):
+    def as_pandas(self, **kwargs) -> Union[Dict[str, pd.DataFrame], pd.DataFrame]:
 
         if self._seed is not None:
             if "odataConversion" in self._seed.keys():
