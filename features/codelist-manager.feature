@@ -415,7 +415,7 @@ Scenario: Correct the "@id" when it's "#table" and we have skos:inScheme defined
       }
       """
 
-Scenario: Escape the notation URIS column templates where they haven't been escaped.
+Scenario: Correct escaped notation/parent_notation column URL templates.
     Given We have a metadata file of the form
       """
       {
