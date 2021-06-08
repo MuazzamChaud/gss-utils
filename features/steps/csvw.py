@@ -59,7 +59,7 @@ def step_impl(context):
 def step_impl(context, expected):
     response, logs = run_csvlint(context)
     assert_equal(response['StatusCode'], 1)
-    assert expected in logs
+    assert expected in logs, logs
 
 
 def run_csvlint(context):
