@@ -1,0 +1,20 @@
+pipeline {
+    agent { label "python" }
+    stages {
+        stage('Test') {
+            steps {
+                container("python") {
+                    sh "pip install pipenv"
+                    sh "pipenv sync --dev --system"
+                    sh "patch -d /usr/local/lib/python3.8/site-packages/behave/formatter -p1 < cucumber-format.patch"
+                    sh "behave -D record_mode=none --tags=-skip -f json.cucumber -o test-results.json"
+                }
+            }
+        }
+    }
+    post {
+        always {
+            cucumber 'test-results.json'
+        }
+    }
+}
