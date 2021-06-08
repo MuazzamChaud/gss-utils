@@ -302,7 +302,8 @@ class CSVWMapping:
                         )
                     ))
                     if "codelist" not in obj:
-                        add_local_codelist(name)
+                        if "parent" not in obj or obj["parent"] != "http://purl.org/linked-data/sdmx/2009/dimension#refPeriod":
+                            add_local_codelist(name)
                 elif "description" in obj or "label" in obj:
                     # local dimension with a definition/label and maybe source of the definition
                     description: Optional[str] = obj.get("description", None)

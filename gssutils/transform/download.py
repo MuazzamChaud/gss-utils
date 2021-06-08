@@ -9,7 +9,7 @@ import pyexcel
 import requests
 import xypath
 from os import environ
-from typing import Union, Dict, Optional
+from typing import List, Union, Dict, Optional
 
 from gssutils.metadata.base import Resource
 from gssutils.metadata.mimetype import ExcelTypes, ODS
@@ -43,10 +43,10 @@ class Downloadable(Resource):
         stream.decode_content = True
         return stream
 
-    def as_databaker(self, **kwargs):
+    def as_databaker(self, **kwargs) -> List[xypath.Table]:
         return self._get_simple_databaker_tabs(**kwargs)
 
-    def as_pandas(self, **kwargs):
+    def as_pandas(self, **kwargs) -> Union[Dict[str, pd.DataFrame], pd.DataFrame]:
 
         if self._seed is not None:
             if "odataConversion" in self._seed.keys():
