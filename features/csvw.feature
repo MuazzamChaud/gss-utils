@@ -522,3 +522,31 @@ Scenario: Manually Overriding CSV-W's graph URI works.
     Then the metadata is valid JSON-LD
     And gsscogs/csvlint should fail with "entotal"
 
+  Scenario: codes with reserved chars, e.g. /
+    Given a CSV file 'observations.csv'
+      | Timezone  | Value |
+      | eu/london | 0     |
+    And a column map
+    """
+    {
+      "Value": {
+        "unit": "http://gss-data.org.uk/def/concept/measurement-units/hours",
+        "measure": "http://gss-data.org.uk/def/measure/offset",
+        "datatype": "integer"
+      }
+    }
+    """
+    And a dataset URI 'http://gss-data.org.uk/data/gss_data/something/something'
+    When I create a CSVW file from the mapping and CSV
+    Then the metadata is valid JSON-LD
+    And gsscogs/csvlint validates ok
+    And gsscogs/csv2rdf generates RDF
+    And the RDF should contain
+    """
+    @prefix qb: <http://purl.org/linked-data/cube#> .
+    @prefix dim: <http://gss-data.org.uk/data/gss_data/something/something#dimension/> .
+
+    <http://gss-data.org.uk/data/gss_data/something/something/eu/london> a qb:Observation ;
+      dim:timezone <http://gss-data.org.uk/data/gss_data/something/something#concept/timezone/eu/london> .
+
+    """

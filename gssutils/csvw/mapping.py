@@ -198,7 +198,7 @@ class CSVWMapping:
             return get_conventional_local_codelist_scheme_uri(column_name)
 
         def get_conventional_local_codelist_concept_uri_template(column_name: str) -> URI:
-            return self.join_dataset_uri(f"#concept/{pathify(column_name)}/{{{self._columns[column_name].name}}}",
+            return self.join_dataset_uri(f"#concept/{pathify(column_name)}/{{+{self._columns[column_name].name}}}",
                                          use_true_dataset_root=True)
 
         def get_value_uri_template_for_col(column_def: object, column_name: str) -> URI:
@@ -480,7 +480,7 @@ class CSVWMapping:
             tableSchema=TableSchema(
                 columns=list(self._columns.values()),
                 primaryKey=self._keys,
-                aboutUrl=self.join_dataset_uri('/'.join('{' + s + '}' for s in self._keys)),
+                aboutUrl=self.join_dataset_uri('/'.join('{+' + s + '}' for s in self._keys)),
                 foreignKeys=self._foreign_keys
             )
         )
