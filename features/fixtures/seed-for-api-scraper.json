@@ -19,7 +19,6 @@
       "to_rdf": "csv2rdf"
   },
   "odataConversion": {
-      "publishedLocation": "https://staging.gss-data.org.uk/sparql",
       "datasetIdentifier": "http://gss-data.org.uk/data/gss_data/trade/hmrc-ots#dataset",
       "chunkColumn": "MonthId",
       "chunkDimension": "dim:refPeriod",

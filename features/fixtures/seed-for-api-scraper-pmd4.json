@@ -18,7 +18,6 @@
       "to_rdf": "csv2rdf"
   },
   "odataConversion": {
-      "publishedLocation": "https://staging.gss-data.org.uk/sparql",
       "datasetIdentifier": "http://gss-data.org.uk/data/gss_data/covid-19/nrs-deaths-involving-coronavirus-covid-19-in-scotland#dataset",
       "chunkDimension": "http://purl.org/linked-data/sdmx/2009/dimension#refPeriod"
   },
