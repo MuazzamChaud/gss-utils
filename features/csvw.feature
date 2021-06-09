@@ -80,7 +80,7 @@ Feature: Create CSVW metadata
     And gsscogs/csv2rdf generates RDF
     And the RDF should contain
       """
-      <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics/imports/year%2F2019/BE/B5/all/all/all> a <http://purl.org/linked-data/cube#Observation>;
+      <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics/imports/year/2019/BE/B5/all/all/all> a <http://purl.org/linked-data/cube#Observation>;
         <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dimension/country>
         <http://gss-data.org.uk/def/concept/cl-area/BE>;
         <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dimension/industry-group>
