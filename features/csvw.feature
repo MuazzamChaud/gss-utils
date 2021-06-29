@@ -52,24 +52,32 @@ Feature: Create CSVW metadata
     """
 
   Scenario: Data Cube has attributes with valuesUrl
-    Given a CSV file 'product-observations.csv'
-    And a JSON map file 'mapping-info.json'
-    And a dataset URI 'http://gss-data.org.uk/data/gss_data/trade/ons-uk-trade-in-goods-by-industry-country-and-commodity'
+    Given a CSV file 'business-characteristics-data-tables.csv'
+    And a JSON map file 'business_char_mapping.json'
+    And a dataset URI 'http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics'
     When I create a CSVW file from the mapping and CSV
     And gsscogs/csv2rdf generates RDF
     And the RDF should contain
       """
-      <http://gss-data.org.uk/data/gss_data/trade/ons-uk-trade-in-goods-by-industry-country-and-commodity/2013/D5/20/EX/05> a <http://purl.org/linked-data/cube#Observation>;
-        <http://gss-data.org.uk/data/gss_data/trade/ons-uk-trade-in-goods-by-industry-country-and-commodity#dimension/industry>
-        <http://gss-data.org.uk/data/gss_data/trade/ons-uk-trade-in-goods-by-industry-country-and-commodity#concept/industry/20>;
-        <http://gss-data.org.uk/def/trade/property/dimension/commodity> <http://gss-data.org.uk/def/trade/concept/commodity/05>;
-        <http://gss-data.org.uk/def/trade/property/dimension/flow-directions> <http://gss-data.org.uk/def/concept/flow-directions/EX>;
-        <http://gss-data.org.uk/def/trade/property/dimension/ons-partner-geography> <http://gss-data.org.uk/def/concept-scheme/sdmx-bop/cl_area/D5>;
-        <http://purl.org/linked-data/cube#dataSet> <http://gss-data.org.uk/data/gss_data/trade/ons-uk-trade-in-goods-by-industry-country-and-commodity#dataset>;
-        <http://purl.org/linked-data/cube#measureType> <http://gss-data.org.uk/def/trade/measure/gbp-total>;
-        <http://purl.org/linked-data/sdmx/2009/attribute#obsStatus> <http://gss-data.org.uk/def/concept/marker/suppressed>;
-        <http://purl.org/linked-data/sdmx/2009/attribute#unitMeasure> <http://gss-data.org.uk/def/concept/measurement-units/gbp>;
-        <http://purl.org/linked-data/sdmx/2009/dimension#refPeriod> <http://reference.data.gov.uk/id/year/2013> .
+      <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics/imports/year/2019/FR/B5/0-0/all/all> a <http://purl.org/linked-data/cube#Observation>;
+      <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dimension/country>
+      <http://gss-data.org.uk/def/concept/cl-area/FR>;
+      <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dimension/industry-group>
+      <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#concept/industry-group/all>;
+      <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dimension/year>
+      <http://reference.data.gov.uk/id/year/2019>;
+      <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dimension/zone>
+      <http://gss-data.org.uk/def/concept/cl-area/B5>;
+      <http://gss-data.org.uk/def/measure/trade> 0;
+      <http://gss-data.org.uk/def/trade/property/attribute/business-count> 9.0;
+      <http://gss-data.org.uk/def/trade/property/attribute/employee-count> "0.0";
+      <http://gss-data.org.uk/def/trade/property/dimension/age-of-business> <http://gss-data.org.uk/def/trade/concept/age-of-business/all>;
+      <http://gss-data.org.uk/def/trade/property/dimension/employment-size-band> <http://gss-data.org.uk/def/trade/concept/employment-size-bands/0-0>;
+      <http://gss-data.org.uk/def/trade/property/dimension/flow-directions> <http://gss-data.org.uk/def/trade/concept/flow-directions/imports>;
+      <http://purl.org/linked-data/cube#dataSet> <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dataset>;
+      <http://purl.org/linked-data/cube#measureType> <http://gss-data.org.uk/def/measure/trade>;
+      <http://purl.org/linked-data/sdmx/2009/attribute#obsStatus> <http://gss-data.org.uk/def/concept/cogs-markers/suppressed>;
+      <http://purl.org/linked-data/sdmx/2009/attribute#unitMeasure> <http://gss-data.org.uk/def/concept/measurement-units/gbp> .
       """
 
   Scenario: Data Cube has attributes without valuesUrl
@@ -81,23 +89,52 @@ Feature: Create CSVW metadata
     And the RDF should contain
       """
       <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics/imports/year/2019/BE/B5/all/all/all> a <http://purl.org/linked-data/cube#Observation>;
-        <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dimension/country>
-        <http://gss-data.org.uk/def/concept/cl-area/BE>;
-        <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dimension/industry-group>
-        <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#concept/industry-group/all>;
-        <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dimension/year>
-        <http://reference.data.gov.uk/id/year/2019>;
-        <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dimension/zone>
-        <http://gss-data.org.uk/def/concept/cl-area/B5>;
-        <http://gss-data.org.uk/def/measure/trade> 24187818088;
-        <http://gss-data.org.uk/def/trade/property/attribute/business-count> "5170.0";
-        <http://gss-data.org.uk/def/trade/property/attribute/employee-count> "4344200.0";
-        <http://gss-data.org.uk/def/trade/property/dimension/age-of-business> <http://gss-data.org.uk/def/trade/concept/age-of-business/all>;
-        <http://gss-data.org.uk/def/trade/property/dimension/employment-size-band> <http://gss-data.org.uk/def/trade/concept/employment-size-bands/all>;
-        <http://gss-data.org.uk/def/trade/property/dimension/flow-directions> <http://gss-data.org.uk/def/trade/concept/flow-directions/imports>;
-        <http://purl.org/linked-data/cube#dataSet> <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dataset>;
-        <http://purl.org/linked-data/cube#measureType> <http://gss-data.org.uk/def/measure/trade>;
-        <http://purl.org/linked-data/sdmx/2009/attribute#unitMeasure> <http://gss-data.org.uk/def/concept/measurement-units/gbp> .
+      <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dimension/country>
+      <http://gss-data.org.uk/def/concept/cl-area/BE>;
+      <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dimension/industry-group>
+      <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#concept/industry-group/all>;
+      <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dimension/year>
+      <http://reference.data.gov.uk/id/year/2019>;
+      <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dimension/zone>
+      <http://gss-data.org.uk/def/concept/cl-area/B5>;
+      <http://gss-data.org.uk/def/measure/trade> 24187818088;
+      <http://gss-data.org.uk/def/trade/property/attribute/business-count> 5170.0;
+      <http://gss-data.org.uk/def/trade/property/attribute/employee-count> "4344200.0";
+      <http://gss-data.org.uk/def/trade/property/dimension/age-of-business> <http://gss-data.org.uk/def/trade/concept/age-of-business/all>;
+      <http://gss-data.org.uk/def/trade/property/dimension/employment-size-band> <http://gss-data.org.uk/def/trade/concept/employment-size-bands/all>;
+      <http://gss-data.org.uk/def/trade/property/dimension/flow-directions> <http://gss-data.org.uk/def/trade/concept/flow-directions/imports>;
+      <http://purl.org/linked-data/cube#dataSet> <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dataset>;
+      <http://purl.org/linked-data/cube#measureType> <http://gss-data.org.uk/def/measure/trade>;
+      <http://purl.org/linked-data/sdmx/2009/attribute#unitMeasure> <http://gss-data.org.uk/def/concept/measurement-units/gbp> .
+      """
+    
+  Scenario: Data Cube has attributes with datatype
+    Given a CSV file 'business-characteristics-data-tables.csv'
+    And a JSON map file 'business_char_mapping.json'
+    And a dataset URI 'http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics'
+    When I create a CSVW file from the mapping and CSV
+    And gsscogs/csvlint validates ok
+    And gsscogs/csv2rdf generates RDF
+    And the RDF should contain
+      """
+      <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics/imports/year/2019/BE/B5/all/all/all> a <http://purl.org/linked-data/cube#Observation>;
+      <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dimension/country>
+      <http://gss-data.org.uk/def/concept/cl-area/BE>;
+      <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dimension/industry-group>
+      <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#concept/industry-group/all>;
+      <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dimension/year>
+      <http://reference.data.gov.uk/id/year/2019>;
+      <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dimension/zone>
+      <http://gss-data.org.uk/def/concept/cl-area/B5>;
+      <http://gss-data.org.uk/def/measure/trade> 24187818088;
+      <http://gss-data.org.uk/def/trade/property/attribute/business-count> 5170.0;
+      <http://gss-data.org.uk/def/trade/property/attribute/employee-count> "4344200.0";
+      <http://gss-data.org.uk/def/trade/property/dimension/age-of-business> <http://gss-data.org.uk/def/trade/concept/age-of-business/all>;
+      <http://gss-data.org.uk/def/trade/property/dimension/employment-size-band> <http://gss-data.org.uk/def/trade/concept/employment-size-bands/all>;
+      <http://gss-data.org.uk/def/trade/property/dimension/flow-directions> <http://gss-data.org.uk/def/trade/concept/flow-directions/imports>;
+      <http://purl.org/linked-data/cube#dataSet> <http://gss-data.org.uk/data/gss_data/trade/uk-trade-in-goods-statistics-by-business-characteristics#dataset>;
+      <http://purl.org/linked-data/cube#measureType> <http://gss-data.org.uk/def/measure/trade>;
+      <http://purl.org/linked-data/sdmx/2009/attribute#unitMeasure> <http://gss-data.org.uk/def/concept/measurement-units/gbp> .
       """
 
 

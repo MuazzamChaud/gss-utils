@@ -342,6 +342,10 @@ class CSVWMapping:
                         self._columns[name] = self._columns[name]._replace(
                             propertyUrl=URI(obj["attribute"])
                         )
+                    #Datatype has been speficied for attribute
+                    if "datatype" in obj:
+                        self._columns[name] = self._columns[name]._replace(datatype=obj["datatype"])
+                    
                     self._components.append(AttributeComponent(
                         at_id=self.join_dataset_uri(f"#component/{pathify(name)}"),
                         qb_componentProperty=Resource(at_id=URI(obj["attribute"])),

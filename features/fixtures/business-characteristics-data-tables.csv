@@ -13,3 +13,4 @@ Value,Flow,Year,Country,Zone,Number of Employees,Age of Business,Industry Group,
 1988616030,imports,year/2019,DZ,D5,all,all,all,90.0,40763.0,
 8649523010,imports,year/2019,AU,D5,all,all,all,5621.0,3153553.0,
 3027521304,imports,year/2019,BD,D5,all,all,all,969.0,1446191.0,
+0,imports,year/2019,FR,B5,0-0,all,all,9.0,0.0,suppressed
