@@ -17,7 +17,7 @@ from rdflib.graph import Dataset as RDFDataset
 
 import gssutils.scrapers
 from gssutils.metadata import namespaces, dcat, pmdcat, mimetype, GOV, GDP
-from gssutils.utils import pathify, ensure_list
+from gssutils.utils import pathify, ensure_list, recordable
 
 
 class BiggerSerializer(serialize.Serializer):
@@ -82,6 +82,9 @@ class Scraper:
 
         if session:
             self.session = session
+        elif 'RECORD_MODE' in os.environ:
+            # don't use cachecontrol, but we'll need to patch the session when used.
+            self.session = requests.Session()
         else:
             self.session = CacheControl(requests.Session(),
                                         cache=FileCache('.cache'),
@@ -137,6 +140,7 @@ class Scraper:
         else:
             return html2text.html2text(html.tostring(node, encoding='unicode'))
 
+    @recordable
     def _run(self):
         scraped = False
 

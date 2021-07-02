@@ -1,6 +1,11 @@
 import re
+from functools import wraps
+import os
+from pathlib import Path
 
 from typing import Union, Sequence, Any, List
+
+import vcr
 from unidecode import unidecode
 
 
@@ -23,3 +28,14 @@ def ensure_list(o: Any) -> List:
         return o
     else:
         return [o]
+
+
+def recordable(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if 'RECORD_MODE' in os.environ:
+            with vcr.use_cassette(str(Path('fixtures') / 'recording.yml'), record_mode=os.environ['RECORD_MODE']):
+                return f(*args, **kwargs)
+        else:
+            return f(*args, **kwargs)
+    return wrapper

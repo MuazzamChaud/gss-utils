@@ -13,6 +13,7 @@ from typing import List, Union, Dict, Optional
 
 from gssutils.metadata.base import Resource
 from gssutils.metadata.mimetype import ExcelTypes, ODS
+from gssutils.utils import recordable
 
 
 class FormatError(Exception):
@@ -38,6 +39,7 @@ class Downloadable(Resource):
         self._seed = None
         self._mediaType = None
 
+    @recordable
     def open(self):
         stream = self._session.get(self.uri, stream=True).raw
         stream.decode_content = True
