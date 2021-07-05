@@ -332,11 +332,21 @@ class CSVWMapping:
                     ))
                     if "codelist" not in obj:
                         add_local_codelist(name)
-                elif "attribute" in obj and "value" in obj:
-                    self._columns[name] = self._columns[name]._replace(
-                        propertyUrl=URI(obj["attribute"]),
-                        valueUrl=URI(obj["value"])
-                    )
+                elif "attribute" in obj:
+                    # Optionally, add the valueUrl if one has been specified
+                    if "value" in obj :
+                        self._columns[name] = self._columns[name]._replace(
+                            propertyUrl=URI(obj["attribute"]),
+                            valueUrl=URI(obj["value"])
+                        )
+                    else: # no valueUrl has been specified
+                        self._columns[name] = self._columns[name]._replace(
+                            propertyUrl=URI(obj["attribute"])
+                        )
+                    #Datatype has been speficied for attribute
+                    if "datatype" in obj:
+                        self._columns[name] = self._columns[name]._replace(datatype=obj["datatype"])
+                    
                     self._components.append(AttributeComponent(
                         at_id=self.join_dataset_uri(f"#component/{pathify(name)}"),
                         qb_componentProperty=Resource(at_id=URI(obj["attribute"])),

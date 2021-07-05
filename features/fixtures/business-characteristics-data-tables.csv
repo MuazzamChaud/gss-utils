@@ -1,0 +1,16 @@
+Value,Flow,Year,Country,Zone,Number of Employees,Age of Business,Industry Group,Business Count,Employee Count,Marker
+24187818088,imports,year/2019,BE,B5,all,all,all,5170.0,4344200.0,
+5637724188,imports,year/2019,CZ,B5,all,all,all,2154.0,2476125.0,
+6138463578,imports,year/2019,DK,B5,all,all,all,2901.0,3544871.0,
+28133129329,imports,year/2019,FR,B5,all,all,all,6521.0,4638017.0,
+63170883033,imports,year/2019,DE,B5,all,all,all,8441.0,5153460.0,
+12947575852,imports,year/2019,IE,B5,all,all,all,4404.0,4313262.0,
+17976718496,imports,year/2019,IT,B5,all,all,all,6492.0,4505063.0,
+40130669248,imports,year/2019,NL,B5,all,all,all,7015.0,4882919.0,
+10486082624,imports,year/2019,PL,B5,all,all,all,3494.0,3462333.0,
+15591673710,imports,year/2019,ES,B5,all,all,all,5115.0,4070348.0,
+6031522059,imports,year/2019,SE,B5,all,all,all,3020.0,3066589.0,
+1988616030,imports,year/2019,DZ,D5,all,all,all,90.0,40763.0,
+8649523010,imports,year/2019,AU,D5,all,all,all,5621.0,3153553.0,
+3027521304,imports,year/2019,BD,D5,all,all,all,969.0,1446191.0,
+0,imports,year/2019,FR,B5,0-0,all,all,9.0,0.0,suppressed
