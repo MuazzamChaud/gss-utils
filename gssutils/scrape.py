@@ -77,7 +77,6 @@ class Scraper:
         self.uri = uri
         self.dataset = pmdcat.Dataset(uri)
         self.catalog = dcat.Catalog()
-        self.dataset.modified = datetime.now(timezone.utc).astimezone()
         self.distributions = []
 
         if session:
@@ -336,7 +335,6 @@ class Scraper:
         self.dataset.landingPage = self.uri
         if not hasattr(self.dataset, 'description') and hasattr(self.catalog, 'description'):
             self.dataset.description = self.catalog.description
-        self.dataset.modified = datetime.now()  # TODO: decision on modified date
         self.update_dataset_uris()
         self.distributions = dataset.distribution
 
@@ -379,7 +377,6 @@ class Scraper:
         catalog.record.label = self.dataset.label + " Catalog Record"
         catalog.record.metadataGraph = metadata_graph
         catalog.record.issued = self.dataset.issued
-        catalog.record.modified = self.dataset.modified
         catalog.record.primaryTopic = self.dataset
         # need to ensure that all the pointed to things are in the same graph
         if hasattr(catalog.record.primaryTopic, 'distribution'):
