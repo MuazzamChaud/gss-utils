@@ -36,7 +36,8 @@ setuptools.setup(
                       'argparse',
                       'wheel',
                       'uritemplate',
-                      'backoff'],
+                      'backoff',
+                      'vcrpy'],
     tests_require=['behave', 'parse', 'nose', 'vcrpy', 'docker'],
     classifiers=[
         "Programming Language :: Python :: 3",
