@@ -87,8 +87,8 @@ class Downloadable(Resource):
             use_fallback = kwargs.get("fallback", None)
             if use_fallback:
                 # Where user specifies, retry with the backup loader which is patched to handle
-                # our edgecase of malformed excel cell properties (by stripping out/ignoring
-                # said cell properties.... hence not the first option).
+                # our libre office edgecase of malformed excel cell properties (works by stripping 
+                # out/ignoring said cell properties.... hence not the first option). 
                 tableset = tableset_backup_loader(err, input_file_obj=bio_fileobj)
                 tabs = list(xypath.loader.get_sheets(tableset, "*"))
                 return tabs
