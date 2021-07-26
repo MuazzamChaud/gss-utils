@@ -182,7 +182,7 @@ def step_impl(context):
                           record_mode=context.config.userdata.get('record_mode',
                                                                   DEFAULT_RECORD_MODE)):
         context.pandas = context.distribution.as_pandas()
-        eq_(type(context.pandas), OrderedDict)
+        assert type(context.pandas) in [OrderedDict, dict]
 
 
 @step("all mandatory fields are set")

@@ -2,6 +2,7 @@ import logging
 from io import BytesIO
 
 import backoff
+from  databaker.framework import tableset_from_xls, tableset_from_xlsx, tableset_from_ods
 
 import pandas as pd
 import requests
@@ -12,8 +13,6 @@ from typing import List, Union, Dict, Optional
 from gssutils.metadata.base import Resource
 from gssutils.metadata.mimetype import ExcelTypes, Excel, ExcelOpenXML, ODS
 from gssutils.utils import recordable
-
-from  databaker.framework import tableset_from_xls, tableset_from_xlsx, tableset_from_ods
 
 class FormatError(Exception):
     """ Raised when the available file format can't be used
@@ -97,12 +96,12 @@ class Downloadable(Resource):
                     return df_dict[kwargs["sheet_name"]]
                 return df_dict
         elif self._mediaType == 'text/csv':
-            with self.open() as csv_obj:
-                return pd.read_csv(csv_obj, **kwargs)
+            return pd.read_csv(self.downloadURL, **kwargs)
         elif self._mediaType == 'application/json':
             # Assume odata
             return self._get_principle_dataframe()
-        raise FormatError(f'Unable to load {self._mediaType} into Pandas DataFrame.')
+        else:
+            raise FormatError(f'Unable to load {self._mediaType} into Pandas DataFrame.')
 
     def _get_principle_dataframe(self, chunks_wanted: Optional[list] = None):
         """
