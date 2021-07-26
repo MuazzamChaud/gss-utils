@@ -2,7 +2,6 @@ import logging
 from io import BytesIO
 
 import backoff
-import pyexcel
 
 import pandas as pd
 import requests
@@ -91,23 +90,17 @@ class Downloadable(Resource):
                 buffered_fobj = BytesIO(fobj.read())
                 return pd.read_excel(buffered_fobj, **kwargs)
         elif self._mediaType == ODS:
-            with self.open() as ods_obj:
-                if 'sheet_name' in kwargs:
-                    return pd.DataFrame(pyexcel.get_array(file_content=ods_obj,
-                                                          file_type='ods',
-                                                          library='pyexcel-ods3',
-                                                          **kwargs))
-                else:
-                    book = pyexcel.get_book(file_content=ods_obj,
-                                            file_type='ods',
-                                            library='pyexcel-ods3')
-                    return {sheet.name: pd.DataFrame(sheet.get_array(**kwargs)) for sheet in book}
+            with self.open() as fobj:
+                buffered_fobj = BytesIO(fobj.read())
+                df_dict = pd.read_excel(buffered_fobj, engine="odf", sheet_name=None)
+                if "sheet_name" in kwargs:
+                    return df_dict[kwargs["sheet_name"]]
+                return df_dict
         elif self._mediaType == 'text/csv':
             with self.open() as csv_obj:
                 return pd.read_csv(csv_obj, **kwargs)
         elif self._mediaType == 'application/json':
             # Assume odata
-
             return self._get_principle_dataframe()
         raise FormatError(f'Unable to load {self._mediaType} into Pandas DataFrame.')
 

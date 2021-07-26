@@ -1,4 +1,5 @@
 import os
+from collections import OrderedDict
 from urllib.parse import urlparse
 
 import requests
@@ -181,7 +182,7 @@ def step_impl(context):
                           record_mode=context.config.userdata.get('record_mode',
                                                                   DEFAULT_RECORD_MODE)):
         context.pandas = context.distribution.as_pandas()
-        eq_(type(context.pandas), dict)
+        eq_(type(context.pandas), OrderedDict)
 
 
 @step("all mandatory fields are set")
