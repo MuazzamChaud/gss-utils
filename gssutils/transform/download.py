@@ -1,9 +1,7 @@
-import json
 import logging
 from io import BytesIO
 
 import backoff
-import messytables
 import pyexcel
 
 import pandas as pd
@@ -16,7 +14,7 @@ from gssutils.metadata.base import Resource
 from gssutils.metadata.mimetype import ExcelTypes, Excel, ExcelOpenXML, ODS
 from gssutils.utils import recordable
 
-from  databaker.framework import tableset_from_xls, tableset_from_xlsx, tableset_from_ods, tableset_backup_loader
+from  databaker.framework import tableset_from_xls, tableset_from_xlsx, tableset_from_ods
 
 class FormatError(Exception):
     """ Raised when the available file format can't be used
@@ -66,35 +64,22 @@ class Downloadable(Resource):
 
         with self.open() as http_response:
             bio_fileobj = BytesIO(http_response.read())
-        try:
-            if self._mediaType == ExcelOpenXML:
-                tableset = tableset_from_xls(input_file_obj=bio_fileobj)
-                tabs = list(xypath.loader.get_sheets(tableset, "*"))
-                return tabs
-            elif self._mediaType == Excel:
-                tableset = tableset_from_xlsx(input_file_obj=bio_fileobj)
-                tabs = list(xypath.loader.get_sheets(tableset, "*"))
-                return tabs
-            elif self._mediaType == ODS:
-                tableset = tableset_from_ods(input_file_obj=bio_fileobj)
-                tabs = list(xypath.loader.get_sheets(tableset, "*"))
-                return tabs
-            else:
-                raise FormatError(f'Unable to load {self._mediaType} into Databaker.')
-        except FormatError as err:
-            raise err
-        except Exception as err:
-            use_fallback = kwargs.get("fallback", None)
-            if use_fallback:
-                # Where user specifies, retry with the backup loader which is patched to handle
-                # our libre office edgecase of malformed excel cell properties (works by stripping 
-                # out/ignoring said cell properties.... hence not the first option). 
-                tableset = tableset_backup_loader(err, input_file_obj=bio_fileobj)
-                tabs = list(xypath.loader.get_sheets(tableset, "*"))
-                return tabs
-            else:
-                raise err
 
+        if self._mediaType == ExcelOpenXML:
+            tableset = tableset_from_xls(input_file_obj=bio_fileobj)
+            tabs = list(xypath.loader.get_sheets(tableset, "*"))
+            return tabs
+        elif self._mediaType == Excel:
+            tableset = tableset_from_xlsx(input_file_obj=bio_fileobj)
+            tabs = list(xypath.loader.get_sheets(tableset, "*"))
+            return tabs
+        elif self._mediaType == ODS:
+            tableset = tableset_from_ods(input_file_obj=bio_fileobj)
+            tabs = list(xypath.loader.get_sheets(tableset, "*"))
+            return tabs
+        else:
+            raise FormatError(f'Unable to load {self._mediaType} into Databaker.')
+    
     def _get_simple_csv_pandas(self, **kwargs) -> Union[Dict[str, pd.DataFrame], pd.DataFrame]:
         """
         Given a distribution object, attempts to return the data as a pandas dataframe
