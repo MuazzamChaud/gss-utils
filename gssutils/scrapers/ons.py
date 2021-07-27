@@ -287,8 +287,8 @@ def handler_dataset_landing_page(scraper, landing_page, tree):
                 else:
                     media_type, _ = mimetypes.guess_type(download_url)
 
-                this_distribution.mediaType, _ = mimetypes.guess_type(download_url)
-
+                this_distribution.mediaType = media_type
+                
                 # inherit metadata from the dataset where it hasn't explicitly been changed
                 this_distribution.title = scraper.dataset.title
                 this_distribution.description = scraper.dataset.description
