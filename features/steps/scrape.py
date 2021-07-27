@@ -140,7 +140,6 @@ def step_impl(context, ref, name):
 def step_impl(context, env, value):
     os.environ[env] = value
 
-
 @step("select the distribution given by")
 def step_impl(context):
     args = {"latest":True}
