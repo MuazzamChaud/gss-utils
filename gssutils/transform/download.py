@@ -64,11 +64,11 @@ class Downloadable(Resource):
             bio_fileobj = BytesIO(http_response.read())
 
         if self._mediaType == ExcelOpenXML:
-            tableset = tableset_from_xls(input_file_obj=bio_fileobj)
+            tableset = tableset_from_xlsx(input_file_obj=bio_fileobj)
             tabs = list(xypath.loader.get_sheets(tableset, "*"))
             return tabs
         elif self._mediaType == Excel:
-            tableset = tableset_from_xlsx(input_file_obj=bio_fileobj)
+            tableset = tableset_from_xls(input_file_obj=bio_fileobj)
             tabs = list(xypath.loader.get_sheets(tableset, "*"))
             return tabs
         elif self._mediaType == ODS:

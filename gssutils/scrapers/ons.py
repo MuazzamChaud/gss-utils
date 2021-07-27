@@ -152,7 +152,7 @@ def handler_dataset_landing_page_fallback(scraper, this_dataset_page, tree):
     download_url = tree.xpath("//a[text()='xls']/@href")
     this_distribution.downloadURL = download_url
 
-    media_type = Excel
+    media_type = media_type, _ = mimetypes.guess_type(download_url)
     this_distribution.mediaType = media_type
 
     this_distribution.title = scraper.dataset.title
@@ -279,13 +279,15 @@ def handler_dataset_landing_page(scraper, landing_page, tree):
                 elif download_url.endswith(".csv"):
                     media_type = CSV
                 elif download_url.endswith(".xlsx"):
+                    media_type = ExcelOpenXML
+                elif download_url.endswith(".xls"):
                     media_type = Excel
                 elif download_url.endswith(".ods"):
                     media_type = ODS
                 else:
                     media_type, _ = mimetypes.guess_type(download_url)
 
-                this_distribution.mediaType = media_type
+                this_distribution.mediaType, _ = mimetypes.guess_type(download_url)
 
                 # inherit metadata from the dataset where it hasn't explicitly been changed
                 this_distribution.title = scraper.dataset.title

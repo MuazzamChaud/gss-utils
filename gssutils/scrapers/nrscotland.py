@@ -45,9 +45,10 @@ def statistics_handler(scraper, tree):
                     except:
                         logging.warning("No Last Issue Date Found. Please update manually")
                         pass
+
                 distribution.mediaType = {
                     'csv': 'text/csv',
-                    'excel': 'application/vnd.ms-excel'
+                    'excel': mimetypes.guess_type(distribution.downloadURL)[0]
                 }.get(
                     file_type,
                     mimetypes.guess_type(distribution.downloadURL)[0]

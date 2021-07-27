@@ -9,9 +9,9 @@ Feature: distribution downloading
   Scenario: databaker with nrscotland XLSX
     Given I scrape the page "https://www.nrscotland.gov.uk/statistics-and-data/statistics/statistics-by-theme/migration/migration-statistics/migration-flows/migration-between-scotland-and-overseas"
     And select the distribution given by
-      | key       | value                                                      |
-      | mediaType | application/vnd.ms-excel                                   |
-      | title     | Migration between administrative areas and overseas by sex |
+      | key       | value                                                             |
+      | mediaType | application/vnd.openxmlformats-officedocument.spreadsheetml.sheet |
+      | title     | Migration between administrative areas and overseas by sex        |
     And fetch the distribution as a databaker object
     Then the sheet names contain [Contents, Metadata, Net-Council Area-Sex]
     And I can access excel_ref 'B6' in the 'Net-Council Area-Sex' tab
@@ -19,9 +19,9 @@ Feature: distribution downloading
   Scenario: pandas with nrscotland XLSX
     Given I scrape the page "https://www.nrscotland.gov.uk/statistics-and-data/statistics/statistics-by-theme/migration/migration-statistics/migration-flows/migration-between-scotland-and-overseas"
     And select the distribution given by
-      | key       | value                                                      |
-      | mediaType | application/vnd.ms-excel                                   |
-      | title     | Migration between Scotland and overseas by age             |
+      | key       | value                                                               |
+      | mediaType | application/vnd.openxmlformats-officedocument.spreadsheetml.sheet   |
+      | title     | Migration between Scotland and overseas by age                      |
     And fetch the 'SYOA Females (2001-)' tab as a pandas DataFrame
     Then the dataframe should have 73 rows
 
