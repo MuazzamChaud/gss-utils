@@ -6,6 +6,6 @@ RUN \
   pip install pipenv && \
   pipenv sync --dev --system
 RUN \
-  patch -d /usr/local/lib/python3.8/site-packages/behave/formatter -p1 < cucumber-format.patch
+  patch -d /usr/local/lib/python3.9/site-packages/behave/formatter -p1 < cucumber-format.patch
 
 ENV PYTHONDONTWRITEBYTECODE=1
