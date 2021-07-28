@@ -276,14 +276,6 @@ def handler_dataset_landing_page(scraper, landing_page, tree):
                 # by checking the download url ending
                 if download_url.endswith(".csdb"):
                     media_type = CSDB
-                elif download_url.endswith(".csv"):
-                    media_type = CSV
-                elif download_url.endswith(".xlsx"):
-                    media_type = ExcelOpenXML
-                elif download_url.endswith(".xls"):
-                    media_type = Excel
-                elif download_url.endswith(".ods"):
-                    media_type = ODS
                 else:
                     media_type, _ = mimetypes.guess_type(download_url)
 
@@ -324,14 +316,9 @@ def handler_static_adhoc(scraper, landing_page, tree):
         # by checking the download url ending
         if download_url.endswith(".csdb"):
             media_type = CSDB
-        elif download_url.endswith(".csv"):
-            media_type = CSV
-        elif download_url.endswith(".xlsx"):
-            media_type = Excel
-        elif download_url.endswith(".ods"):
-            media_type = ODS
         else:
             media_type, _ = mimetypes.guess_type(download_url)
+
         this_distribution.mediaType = media_type
 
         this_distribution.title = title
