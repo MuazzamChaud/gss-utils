@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3.9
 
 WORKDIR /workspace
 COPY Pipfile Pipfile.lock cucumber-format.patch setup.py /workspace/
