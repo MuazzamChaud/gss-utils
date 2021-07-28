@@ -27,10 +27,8 @@ def scrape(scraper, tree):
         if match:
             if match.group(1) == 'PDF':
                 dist.mediaType = PDF
-            elif match.group(1) == 'Excel':
-                dist.mediaType = Excel
             else:
-                dist.mediaType, encoding = mimetypes.guess_type(dist.downloadURL)
+                dist.mediaType, _ = mimetypes.guess_type(dist.downloadURL)
             size = float(match.group(2))
             if match.group(3) == 'KB':  # https://en.wikipedia.org/wiki/Kilobyte kB = 1000 while KB = 1024
                 dist.byteSize = int(size * 1024)

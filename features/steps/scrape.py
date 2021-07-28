@@ -1,4 +1,5 @@
 import os
+from collections import OrderedDict
 from urllib.parse import urlparse
 
 import requests
@@ -139,7 +140,6 @@ def step_impl(context, ref, name):
 def step_impl(context, env, value):
     os.environ[env] = value
 
-
 @step("select the distribution given by")
 def step_impl(context):
     args = {"latest":True}
@@ -181,7 +181,7 @@ def step_impl(context):
                           record_mode=context.config.userdata.get('record_mode',
                                                                   DEFAULT_RECORD_MODE)):
         context.pandas = context.distribution.as_pandas()
-        eq_(type(context.pandas), dict)
+        assert type(context.pandas) in [OrderedDict, dict]
 
 
 @step("all mandatory fields are set")

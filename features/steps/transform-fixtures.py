@@ -37,6 +37,7 @@ def step_impl(context, filename):
     assert fixtures.exists()
     assert fixtures.is_dir()
     assert (fixtures / filename).exists()
+
     # remember the file state
     if not hasattr(context, 'filestats'):
         context.filestats = {}
@@ -48,8 +49,20 @@ def step_impl(context, filename):
 
 @then('the fixtures file "{filename}" should not change')
 def step_impl(context, filename):
+
     fixture_file = Path('fixtures') / filename
-    eq_(context.filestats[filename], fixture_file.stat())
+    previous_stats = context.filestats[filename]
+    current_stats = fixture_file.stat()
+
+    # This is in aid of removing "st_atime" (time last accessed)
+    # from the comparison as it can legitimately differ
+    compare_attrs = [
+        'st_mode', 'st_ino', 'st_dev', 
+        'st_nlink', 'st_uid', 'st_gid', 
+        'st_size', 'st_mtime', 'st_ctime'
+    ]
+    for attr in compare_attrs:
+        eq_(getattr(previous_stats, attr), getattr(current_stats, attr)) 
     eq_(context.filehash[filename], file_hash(fixture_file))
 
 

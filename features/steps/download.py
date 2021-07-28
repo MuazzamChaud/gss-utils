@@ -79,8 +79,18 @@ def step_impl(context, column_count):
 
 @then('the chunk column only contains the required chunks')
 def step_impl(context):
-    assert context.df[context.chunk_column_name].isin(context.required_chunks).all(), \
-        f"Chunk column contains unexpected data. Expected a null set."
+    # Force list of same dtype
+    data_got = list(context.df[context.chunk_column_name].astype(str).unique())
+    data_expected = [str(x) for x in context.required_chunks]
+    assert all([x in data_expected for x in data_got]), (f'''
+        Chunk column contains unexpected data.
+        
+        Expected:
+        {data_expected}
+
+        Got:
+        {data_got}
+        ''')
 
 
 @then('I identify the chunks for that dataset on the API as')

@@ -1,20 +1,18 @@
-import json
 import logging
 from io import BytesIO
 
 import backoff
-import messytables
+from  databaker.framework import tableset_from_xls, tableset_from_xlsx, tableset_from_ods
+
 import pandas as pd
-import pyexcel
 import requests
 import xypath
 from os import environ
 from typing import List, Union, Dict, Optional
 
 from gssutils.metadata.base import Resource
-from gssutils.metadata.mimetype import ExcelTypes, ODS
+from gssutils.metadata.mimetype import ExcelTypes, Excel, ExcelOpenXML, ODS
 from gssutils.utils import recordable
-
 
 class FormatError(Exception):
     """ Raised when the available file format can't be used
@@ -59,23 +57,27 @@ class Downloadable(Resource):
     def _get_simple_databaker_tabs(self, **kwargs):
         """
         Given a distribution object representing a spreadsheet, attempts to return a list
-        of databaker tables objects.
+        of databaker table objects.
         """
-        if self._mediaType in ExcelTypes:
-            with self.open() as fobj:
-                tableset = messytables.excel.XLSTableSet(fileobj=fobj)
-                tabs = list(xypath.loader.get_sheets(tableset, "*"))
-                return tabs
-        elif self._mediaType == ODS:
-            with self.open() as ods_obj:
-                excel_obj = BytesIO()
-                book = pyexcel.get_book(file_type='ods', file_content=ods_obj, library='pyexcel-ods3')
-                book.save_to_memory(file_type='xls', stream=excel_obj)
-                tableset = messytables.excel.XLSTableSet(fileobj=excel_obj)
-                tabs = list(xypath.loader.get_sheets(tableset, "*"))
-                return tabs
-        raise FormatError(f'Unable to load {self._mediaType} into Databaker.')
 
+        with self.open() as http_response:
+            bio_fileobj = BytesIO(http_response.read())
+
+        if self._mediaType == ExcelOpenXML:
+            tableset = tableset_from_xlsx(input_file_obj=bio_fileobj)
+            tabs = list(xypath.loader.get_sheets(tableset, "*"))
+            return tabs
+        elif self._mediaType == Excel:
+            tableset = tableset_from_xls(input_file_obj=bio_fileobj)
+            tabs = list(xypath.loader.get_sheets(tableset, "*"))
+            return tabs
+        elif self._mediaType == ODS:
+            tableset = tableset_from_ods(input_file_obj=bio_fileobj)
+            tabs = list(xypath.loader.get_sheets(tableset, "*"))
+            return tabs
+        else:
+            raise FormatError(f'Unable to load {self._mediaType} into Databaker.')
+    
     def _get_simple_csv_pandas(self, **kwargs) -> Union[Dict[str, pd.DataFrame], pd.DataFrame]:
         """
         Given a distribution object, attempts to return the data as a pandas dataframe
@@ -87,25 +89,19 @@ class Downloadable(Resource):
                 buffered_fobj = BytesIO(fobj.read())
                 return pd.read_excel(buffered_fobj, **kwargs)
         elif self._mediaType == ODS:
-            with self.open() as ods_obj:
-                if 'sheet_name' in kwargs:
-                    return pd.DataFrame(pyexcel.get_array(file_content=ods_obj,
-                                                          file_type='ods',
-                                                          library='pyexcel-ods3',
-                                                          **kwargs))
-                else:
-                    book = pyexcel.get_book(file_content=ods_obj,
-                                            file_type='ods',
-                                            library='pyexcel-ods3')
-                    return {sheet.name: pd.DataFrame(sheet.get_array(**kwargs)) for sheet in book}
+            with self.open() as fobj:
+                buffered_fobj = BytesIO(fobj.read())
+                df_dict = pd.read_excel(buffered_fobj, engine="odf", sheet_name=None)
+                if "sheet_name" in kwargs:
+                    return df_dict[kwargs["sheet_name"]]
+                return df_dict
         elif self._mediaType == 'text/csv':
-            with self.open() as csv_obj:
-                return pd.read_csv(csv_obj, **kwargs)
+            return pd.read_csv(self.downloadURL, **kwargs)
         elif self._mediaType == 'application/json':
             # Assume odata
-
             return self._get_principle_dataframe()
-        raise FormatError(f'Unable to load {self._mediaType} into Pandas DataFrame.')
+        else:
+            raise FormatError(f'Unable to load {self._mediaType} into Pandas DataFrame.')
 
     def _get_principle_dataframe(self, chunks_wanted: Optional[list] = None):
         """

@@ -40,9 +40,9 @@ Feature: Scrape dataset info
   Scenario: nrscotland downloads
     Given I scrape the page "https://www.nrscotland.gov.uk/statistics-and-data/statistics/statistics-by-theme/migration/migration-statistics/migration-flows/migration-between-scotland-and-overseas"
     And select the distribution given by
-      | key       | value                                                      |
-      | mediaType | application/vnd.ms-excel                                   |
-      | title     | Migration between administrative areas and overseas by sex |
+      | key       | value                                                               |
+      | mediaType | application/vnd.openxmlformats-officedocument.spreadsheetml.sheet   |
+      | title     | Migration between administrative areas and overseas by sex          |
     Then the data can be downloaded from "https://www.nrscotland.gov.uk/files//statistics/migration/flows/apr-20/mig-overseas-admin-sex-tab1.xlsx"
 
   Scenario: Scrape NISRA
@@ -196,9 +196,9 @@ Feature: Scrape dataset info
   Scenario: ONS MRETS as csv, xlsx and structured text
     Given I scrape the page "https://www.ons.gov.uk/economy/nationalaccounts/balanceofpayments/datasets/tradeingoodsmretsallbopeu2013timeseriesspreadsheet"
     And select the distribution given by
-      | key       | value                                                                    |
-      | mediaType | application/vnd.ms-excel        |
-      | latest    | true                            |
+      | key       | value                                                                     |
+      | mediaType | application/vnd.openxmlformats-officedocument.spreadsheetml.sheet         |
+      | latest    | true                                                                      |
     Then the data can be downloaded from "https://www.ons.gov.uk/file?uri=/economy/nationalaccounts/balanceofpayments/datasets/tradeingoodsmretsallbopeu2013timeseriesspreadsheet/current/mret.xlsx"
     And select the distribution given by
       | key       | value                           |
