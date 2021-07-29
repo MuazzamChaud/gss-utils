@@ -96,7 +96,8 @@ class Downloadable(Resource):
                     return df_dict[kwargs["sheet_name"]]
                 return df_dict
         elif self._mediaType == 'text/csv':
-            return pd.read_csv(self.downloadURL, **kwargs)
+            with self.open() as csv_obj:
+                return pd.read_csv(csv_obj, **kwargs)
         elif self._mediaType == 'application/json':
             # Assume odata
             return self._get_principle_dataframe()
