@@ -96,7 +96,11 @@ class Downloadable(Resource):
                     return df_dict[kwargs["sheet_name"]]
                 return df_dict
         elif self._mediaType == 'text/csv':
-            return pd.read_csv(self.downloadURL, **kwargs)
+            with self.open() as csv_obj:
+                # Restore pandas < 1.2 behaviour for encoding errors
+                if "encoding" in kwargs and "encoding_errors" not in kwargs:
+                    kwargs["encoding_errors"] = "replace"
+                return pd.read_csv(csv_obj, **kwargs)
         elif self._mediaType == 'application/json':
             # Assume odata
             return self._get_principle_dataframe()
