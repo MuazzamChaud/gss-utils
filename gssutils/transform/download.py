@@ -96,13 +96,8 @@ class Downloadable(Resource):
                     return df_dict[kwargs["sheet_name"]]
                 return df_dict
         elif self._mediaType == 'text/csv':
-            # Pandas seems to have an issue taking encoding alongside a httpReponse
-            # so we're goona catch it and retry via the direct approach for decoding errors.
-            try:
-                with self.open() as csv_obj:
-                    return pd.read_csv(csv_obj, **kwargs)
-            except UnicodeDecodeError:
-                return pd.read_csv(self.downloadURL, **kwargs)
+            with self.open() as csv_obj:
+                return pd.read_csv(csv_obj, encoding_errors="replace", **kwargs)
         elif self._mediaType == 'application/json':
             # Assume odata
             return self._get_principle_dataframe()
