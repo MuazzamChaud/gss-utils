@@ -87,6 +87,9 @@ def scrape(scraper, tree):
         # if we're skipping a field, we might want to know
         logging.debug("no description.contact key in json, skipping")
 
+    scraper.dataset.keyword = list(
+        set([x.strip() for x in landing_page["description"]["keywords"]]))
+
     # boiler plate
     scraper.dataset.publisher = 'https://www.gov.uk/government/organisations/office-for-national-statistics'
     scraper.dataset.license = "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"

@@ -9,6 +9,7 @@ Feature: Scrape dataset info
     And the publication date should match "20[0-9]{2}-[01][0-9]-[0-3][0-9]"
     And the comment should be "Annual statistics on the investment of foreign companies into the UK, including for investment flows, positions and earnings."
     And the contact email address should be "mailto:fdi@ons.gov.uk"
+    And the keywords should be "['business investment', 'stocks', 'investment flows']"
 
   Scenario: ONS metadata profile
     Given I scrape the page "https://www.ons.gov.uk/businessindustryandtrade/business/businessinnovation/datasets/foreigndirectinvestmentinvolvingukcompanies2013inwardtables"
@@ -17,6 +18,7 @@ Feature: Scrape dataset info
     And dct:publisher should be `gov:office-for-national-statistics`
     And dct:issued should match `"20[0-9]{2}-[01][0-9]-[0-3][0-9]"\^\^xsd:date`
     And dcat:contactPoint should be `<mailto:fdi@ons.gov.uk>`
+    And dcat:keyword should be `['"business investment"@en', '"stocks"@en', '"investment flows"@en']`
 
   Scenario: Scrape gov.uk template
     Given I scrape the page "https://www.gov.uk/government/statistics/immigration-statistics-october-to-december-2017-data-tables"
