@@ -26,8 +26,7 @@ class Resource(Metadata):
         'type': (DCTERMS.type, Status.recommended, URIRef),  # skos:Concept
         'relation': (DCTERMS.relation, Status.recommended, URIRef),
         'qualifiedRelation': (DCAT.qualifiedRelation, Status.recommended, URIRef),
-        'keyword': (DCAT.keyword, Status.recommended, 
-            lambda l: [Literal(m, 'en') for m in l] if isinstance(l, list) else Literal(l, 'en')),
+        'keyword': (DCAT.keyword, Status.recommended, lambda l: Literal(l, 'en')),
         'landingPage': (DCAT.landingPage, Status.mandatory, URIRef),  # foaf:Document
         'qualifiedAttribution': (PROV.qualifiedAttribution, Status.recommended, URIRef),
         'license': (DCTERMS.license, Status.recommended, URIRef),
