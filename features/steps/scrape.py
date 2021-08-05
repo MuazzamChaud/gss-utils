@@ -86,6 +86,12 @@ def step_impl(context, date):
     assert_regexp_matches(context.scraper.next_release, date)
 
 
+@step('the description should be "{description}"')
+def step_impl(context, description):
+    # TODO: Behave escapes '\n' strings in steps. Workaround for now.
+    eq_(context.scraper.dataset.description, description.replace("\\n", "\n"))
+
+
 @step('the description should start "{description}"')
 def step_impl(context, description):
     ok_(context.scraper.description.startswith(description))
@@ -153,6 +159,7 @@ def step_impl(context, ref, name):
 @step("the '{env}' environment variable is '{value}'")
 def step_impl(context, env, value):
     os.environ[env] = value
+
 
 @step("select the distribution given by")
 def step_impl(context):

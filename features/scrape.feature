@@ -101,6 +101,13 @@ Feature: Scrape dataset info
     And the comment should be "Exports and imports goods data by individual country for UK trade in goods."
     And the data can be downloaded from "https://www.ons.gov.uk/file?uri=/economy/nationalaccounts/balanceofpayments/adhocs/008596individualcountrydatagoodsonamonthlybasisfromjanuary1998toapril2018/04.allcountriesapril2018.xls"
 
+  Scenario: Scrape ONS User Requested Data and get an appropriate comment/description
+    Given I scrape the page "https://www.ons.gov.uk/economy/economicoutputandproductivity/output/adhocs/13524businessinsightsandconditionssurveybicswave33adhoctablesdepartmentfortransport"
+    Then the title should match "Business Insights and Conditions Survey \(BICS\) wave 33 ad-hoc tables: Department for Transport"
+    And the comment should be "Ad Hoc tables for the Department for Transport. The weighted table included is a crosstab of returning to work questions that was not published in the weighted Business Insights and Conditions Survey (BICS) Wave 33 results."
+    And the description should be "Ad Hoc tables for the Department for Transport. The weighted table included is a crosstab of returning to work questions that was not published in the weighted Business Insights and Conditions Survey (BICS) Wave 33 results. \n\nThe sample design for BICS was reviewed and refreshed in Wave 17 and will be the basis for future waves.  This sample redesign improves our coverage for the smaller sized businesses. \n\nThe survey was sent to around 39,000 UK businesses, and results presented in this release are based on a limited number of responses, around 25.0% (9,645) of all businesses surveyed who responded.\n\n### Contact\nFor more information on this request please email <bics@ons.gov.uk>."
+
+
   Scenario: Scrape DoH Northern Ireland
     Given I scrape the page "https://www.health-ni.gov.uk/publications/census-drug-and-alcohol-treatment-services-northern-ireland-2017"
     Then dct:publisher should be `gov:department-of-health-northern-ireland`
