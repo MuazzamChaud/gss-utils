@@ -46,9 +46,7 @@ def scrape(scraper, tree):
 
     # Acquire title and description from the page json
     # literally just whatever's in {"description": {"title": <THIS> }}
-    # and {"description": {"metaDescription": <THIS> }}
     scraper.dataset.title = landing_page["description"]["title"].strip()
-    scraper.dataset.description = landing_page["description"]["metaDescription"]
 
     # Same with date, but use parse_as_local_date() which converts to the right time type
     scraper.dataset.issued = parse_as_local_date(landing_page["description"]["releaseDate"])
@@ -57,11 +55,14 @@ def scrape(scraper, tree):
     # the most common one for datasets is dataset_landing_page
     # if that's the page type we're looking at then the comment is in {"description": {"summary": <THIS> }}
     # otherwise, look in the markdown field (adhoc notes about a page)
+    # for page types other than dataset_landing_page, the markdown field can be quite long, so we truncate
     page_type = landing_page["type"]
     if page_type == "dataset_landing_page":
         scraper.dataset.comment = landing_page["description"]["summary"].strip()
+        scraper.dataset.description = landing_page["description"]["metaDescription"]
     else:
-        scraper.dataset.comment = landing_page["markdown"][0]
+        scraper.dataset.comment = landing_page["markdown"][0].split("\n")[0].strip()
+        scraper.dataset.description = landing_page["markdown"][0]
 
     # not all page types have a next Release date field, also - "to be announced" is useless as is a blank entry.
     # so if its present, not blank, and doesnt say "to be announced" get it as
