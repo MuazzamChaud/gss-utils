@@ -7,3 +7,5 @@ gss-utils.iml
 gssutils.egg*
 out
 codelists
+**/.DS_Store
+.vscode

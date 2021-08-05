@@ -1,4 +1,5 @@
 import os
+import ast
 from collections import OrderedDict
 from urllib.parse import urlparse
 
@@ -95,6 +96,13 @@ def step_impl(context, email):
     assert_equal(context.scraper.contact, email)
 
 
+@step('the keywords should be "{keywords}"')
+def step_impl(context, keywords):
+    # An awkward workaround to deal with the fact that keywords are a list
+    # https://stackoverflow.com/questions/1894269/how-to-convert-string-representation-of-list-to-a-list
+    assert_equal(set(context.scraper.dataset.keyword), set(ast.literal_eval(keywords)))
+
+
 @step('there should be "{num_of_distributions}" distributions')
 def step_impl(context, num_of_distributions):
     assert len(context.scraper.distributions) == int(num_of_distributions), \
@@ -104,7 +112,13 @@ def step_impl(context, num_of_distributions):
 @then("{prefix}:{property} should be `{object}`")
 def step_impl(context, prefix, property, object):
     ns = {'dct': DCTERMS, 'dcat': DCAT, 'rdfs': RDFS}.get(prefix)
-    assert_equal(context.scraper.dataset.get_property(ns[property]).n3(namespaces), object)
+    properties = context.scraper.dataset.get_property(ns[property])
+    if isinstance(properties, list):
+        properties = set(list(map(lambda t: t.n3(namespaces), properties)))
+        object = set(ast.literal_eval(object))
+    else :
+        properties = properties.n3(namespaces)
+    assert_equal(properties, object)
 
 
 @then("{prefix}:{property} should match `{object}`")
