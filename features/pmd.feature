@@ -42,7 +42,9 @@ Feature: PMD metadata
         dct:title "Foreign direct investment involving UK companies: inward"@en ;
         void:sparqlEndpoint <http://gss-data.org.uk/sparql> ;
         rdfs:comment "Annual statistics on the investment of foreign companies into the UK, including for investment flows, positions and earnings."@en ;
-        dct:description "Inward Foreign Direct Investment (FDI) Involving UK Companies, 2016 (Directional Principle)"@en .
+        dct:description "Inward Foreign Direct Investment (FDI) Involving UK Companies, 2016 (Directional Principle)"@en ;
+        pmdcat:markdownDescription "Inward Foreign Direct Investment (FDI) Involving UK Companies, 2016 (Directional Principle)"^^<https://www.w3.org/ns/iana/media-types/text/markdown#Resource> ;
+        .
       }
       """
 

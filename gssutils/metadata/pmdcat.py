@@ -48,7 +48,7 @@ class Dataset(dcat.Dataset):
         # pmdcat:graph declares the graph containing the qb:DataSet
         'pmdcatGraph': (PMDCAT.graph, Status.mandatory, URIRef),
         'datasetContents': (PMDCAT.datasetContents, Status.mandatory, lambda d: URIRef(d.uri)),
-        'markdownDescription': (PMDCAT.markdownDescription, Status.recommended, lambda l: Literal(l, MARKDOWN)),
+        'markdownDescription': (PMDCAT.markdownDescription, Status.recommended, lambda l: Literal(l, datatype=MARKDOWN)),
         'sparqlEndpoint': (VOID.sparqlEndpoint, Status.mandatory, URIRef),
         'family': (GDP.family, Status.mandatory, GDP.term),
         'updateDueOn': (GDP.updateDueOn, Status.recommended, Literal)
@@ -67,4 +67,6 @@ class Dataset(dcat.Dataset):
             # TODO: remove the following once we distinguish between the modification datetime of a dataset
             #       in PMD and the last modification datetime of the dataset by the publisher.
             value = datetime.now(timezone.utc).astimezone()
+        elif key == 'description':
+            self.markdownDescription = value
         super().__setattr__(key, value)
