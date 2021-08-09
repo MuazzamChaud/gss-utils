@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from rdflib import URIRef, Literal
 from rdflib.namespace import VOID
 
-from gssutils.metadata import PMDCAT, DCAT, MARKDOWN, GDP
+from gssutils.metadata import PMDCAT, DCAT, MARKDOWN, GDP, GSSC, XSD
 from gssutils.metadata import base, dcat
 from gssutils.metadata.base import Status
 
@@ -51,7 +51,11 @@ class Dataset(dcat.Dataset):
         'markdownDescription': (PMDCAT.markdownDescription, Status.recommended, lambda l: Literal(l, datatype=MARKDOWN)),
         'sparqlEndpoint': (VOID.sparqlEndpoint, Status.mandatory, URIRef),
         'family': (GDP.family, Status.mandatory, GDP.term),
-        'updateDueOn': (GDP.updateDueOn, Status.recommended, Literal)
+        'updateDueOn': (GDP.updateDueOn, Status.recommended, Literal),
+        'temporalStart': (GSSC.temporalStart, Status.recommended, lambda l: Literal(l, datatype=XSD.date)),
+        'temporalEnd': (GSSC.temporalEnd, Status.recommended, lambda l: Literal(l, datatype=XSD.date)),
+        'temporalResolution': (GSSC.temporalResolution, Status.recommended, lambda l: Literal(l, datatype=XSD.duration)),
+        'spatialResolution': (GSSC.spatialResolution, Status.recommended, URIRef)
     })
 
     def __init__(self, landingPage):

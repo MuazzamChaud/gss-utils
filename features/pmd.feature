@@ -79,3 +79,30 @@ Feature: PMD metadata
       And generate TriG
       Then the TriG should contain triples given by "pmd4-metadata.ttl"
 
+    Scenario: Spatio-temporal coverage
+      Given I scrape the page "https://www.ons.gov.uk/businessindustryandtrade/business/businessinnovation/datasets/foreigndirectinvestmentinvolvingukcompanies2013inwardtables"
+      And set the base URI to <http://gss-data.org.uk>
+      And set the dataset ID to <foreign-direct-investment-inward>
+      And set the temporalStart to "2013-01-01"
+      And set the temporalEnd to "2019-12-31"
+      And set the temporalResolution to "P1Y"
+      And set spatial to "http://statistics.data.gov.uk/id/statistical-geography/K02000001"
+      And set the spatialResolution to "http://gss-data.org.uk/def/international-geography/level/country"
+      And generate TriG
+      Then the TriG should contain
+        """
+        @prefix dct: <http://purl.org/dc/terms/> .
+        @prefix gssc: <http://gss-data.org.uk/def/coverage/> .
+        @prefix pmdcat: <http://publishmydata.com/pmdcat#> .
+        @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+        <http://gss-data.org.uk/graph/foreign-direct-investment-inward/metadata> {
+            <http://gss-data.org.uk/data/foreign-direct-investment-inward-catalog-entry> a pmdcat:Dataset ;
+                gssc:temporalStart "2013-01-01"^^xsd:date ;
+                gssc:temporalEnd "2019-12-31"^^xsd:date ;
+                gssc:temporalResolution "P1Y"^^xsd:duration ;
+                dct:spatial <http://statistics.data.gov.uk/id/statistical-geography/K02000001> ;
+                gssc:spatialResolution <http://gss-data.org.uk/def/international-geography/level/country> ;
+                .
+        }
+        """
