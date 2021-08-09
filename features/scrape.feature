@@ -107,7 +107,6 @@ Feature: Scrape dataset info
     And the comment should be "Ad Hoc tables for the Department for Transport. The weighted table included is a crosstab of returning to work questions that was not published in the weighted Business Insights and Conditions Survey (BICS) Wave 33 results."
     And the description should be "Ad Hoc tables for the Department for Transport. The weighted table included is a crosstab of returning to work questions that was not published in the weighted Business Insights and Conditions Survey (BICS) Wave 33 results. \n\nThe sample design for BICS was reviewed and refreshed in Wave 17 and will be the basis for future waves.  This sample redesign improves our coverage for the smaller sized businesses. \n\nThe survey was sent to around 39,000 UK businesses, and results presented in this release are based on a limited number of responses, around 25.0% (9,645) of all businesses surveyed who responded.\n\n### Contact\nFor more information on this request please email <bics@ons.gov.uk>."
 
-
   Scenario: Scrape DoH Northern Ireland
     Given I scrape the page "https://www.health-ni.gov.uk/publications/census-drug-and-alcohol-treatment-services-northern-ireland-2017"
     Then dct:publisher should be `gov:department-of-health-northern-ireland`
@@ -158,7 +157,7 @@ Feature: Scrape dataset info
     When I select the latest dataset whose title starts with "Substance misuse treatment for adults"
     Then dct:title should match `"Substance misuse treatment for adults: statistics.*"@en`
     And dct:publisher should be `gov:public-health-england`
-    And dct:description should match `.*alcohol and drug misuse treatment for adults from Public Health England's National Drug Treatment Monitoring System.*`
+    And dct:description should match `.*Public Health England collects data on patients receiving substance.*`
 
   Scenario: Scrape NHS digital
     Given I scrape the page "https://digital.nhs.uk/data-and-information/publications/statistical/statistics-on-alcohol"
@@ -260,7 +259,8 @@ Feature: Scrape dataset info
     Given I scrape the page "https://www.gov.uk/government/collections/uk-regional-trade-in-goods-statistics-disaggregated-by-smaller-geographical-areas"
     And the catalog has more than one dataset
     When I select the latest dataset whose title starts with "Regional trade in goods statistics disaggregated by smaller geographical areas"
-    Then the description should start "International trade in goods data at summary product and country level, by UK areas smaller than NUTS1"
+    Then the comment should be "International trade in goods data at summary product and country level, by UK areas smaller than NUTS1."
+    And the description should start "HM Revenue & Customs (HMRC) collects the UK’s international trade in goods"
 
   Scenario: latest distribution but no issued date
     Given I scrape the page "https://www.gov.uk/government/statistics/alcohol-bulletin"
@@ -310,10 +310,12 @@ Feature: Scrape dataset info
     Then the markdown representation should start with
     """
     ## Alcohol Bulletin
-
+      
+    Monthly statistics from the 4 different alcohol duty regimes administered by HM Revenue and Customs.
+    
     ### Description
-
-    Monthly statistics from the 4 different alcohol duty regimes
+    
+    This National Statistics publication presents statistics
     """
 
   Scenario: gov.uk guidance page
