@@ -255,4 +255,4 @@ def step_impl(context, url):
 
 @step("the markdown representation should start with")
 def step_impl(context):
-    assert(context.scraper._repr_markdown_().startswith(context.text))
+    eq_(context.scraper._repr_markdown_()[:len(context.text)], context.text)

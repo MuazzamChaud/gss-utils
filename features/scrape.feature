@@ -310,11 +310,11 @@ Feature: Scrape dataset info
     Then the markdown representation should start with
     """
     ## Alcohol Bulletin
-      
+
     Monthly statistics from the 4 different alcohol duty regimes administered by HM Revenue and Customs.
-    
+
     ### Description
-    
+
     This National Statistics publication presents statistics
     """
 
