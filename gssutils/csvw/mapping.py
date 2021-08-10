@@ -47,6 +47,7 @@ class CSVWMapping:
         self._containing_graph_uri: Optional[URI] = None
         self._codelist_base: Optional[Path] = None
         self._suppress_catalog_and_dsd_output: bool = False
+        self._index: int = 0
 
     @staticmethod
     def namify(column_header: str):
@@ -180,6 +181,10 @@ class CSVWMapping:
         if not set(prefix_map.keys()).issuperset(used_prefixes):
             logging.error(f"Unknown prefixes used: {used_prefixes.difference(prefix_map.keys())}")
 
+    def _next_index(self):
+        self._index = self._index + 1
+        return self._index
+
     def _as_csvw_object(self):
         def get_conventional_local_codelist_scheme_uri(column_name: str) -> Resource:
             codelist_uri = self.join_dataset_uri(f"#scheme/{pathify(column_name)}", use_true_dataset_root=True)
@@ -272,7 +277,8 @@ class CSVWMapping:
                             rdfs_range=Resource(
                                 at_id=self.join_dataset_uri(f"#class/{CSVWMapping.classify(name)}")
                             )
-                        )
+                        ),
+                        qb_order=self._next_index()
                     ))
                 elif "parent" in obj:
                     # a local dimension that has a super property
@@ -299,7 +305,8 @@ class CSVWMapping:
                             rdfs_comment=description,
                             rdfs_subPropertyOf=Resource(at_id=URI(obj["parent"])),
                             rdfs_isDefinedBy=source
-                        )
+                        ),
+                        qb_order=self._next_index()
                     ))
                     if "codelist" not in obj:
                         if "parent" not in obj or obj["parent"] != "http://purl.org/linked-data/sdmx/2009/dimension#refPeriod":
@@ -328,7 +335,8 @@ class CSVWMapping:
                             rdfs_label=label,
                             rdfs_comment=description,
                             rdfs_isDefinedBy=source
-                        )
+                        ),
+                        qb_order=self._next_index()
                     ))
                     if "codelist" not in obj:
                         add_local_codelist(name)
@@ -431,7 +439,8 @@ class CSVWMapping:
                         qb_codeList=get_conventional_local_codelist_scheme_uri(name),
                         rdfs_label=name,
                         rdfs_comment=description
-                    )
+                    ),
+                    qb_order=self._next_index()
                 ))
                 add_local_codelist(name)
 
