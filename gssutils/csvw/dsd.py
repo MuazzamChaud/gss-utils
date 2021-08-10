@@ -36,6 +36,7 @@ class DimensionComponent(NamedTuple):
     qb_dimension: DimensionProperty
     at_type: Union[URI, List[URI]] = "qb:ComponentSpecification"
     qb_componentProperty: Optional[Resource] = None
+    qb_order: Optional[int] = None
 
 
 class MeasureComponent(NamedTuple):
