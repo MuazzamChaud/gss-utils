@@ -87,6 +87,7 @@ def content_api_publication(scraper, metadata):
     if 'description' in metadata:
         ds.comment = metadata['description']
     if 'details' in metadata:
+        # TODO, depends on outcome of https://github.com/GSS-Cogs/gss-utils/issues/308
         ds.description = html2text.html2text(metadata["details"]["body"])
     if 'api_url' in metadata:
         doc_info = scraper.session.get(metadata['api_url']).json()
@@ -99,6 +100,7 @@ def content_api_publication(scraper, metadata):
     if 'description' in doc_info:
         ds.comment = doc_info['description']
     if 'description' in doc_info:
+        # TODO, depends on outcome of https://github.com/GSS-Cogs/gss-utils/issues/308
         ds.description = html2text.html2text(doc_info["details"]["body"]) 
     if 'links' in doc_info and 'organisations' in doc_info['links']:
         orgs = doc_info['links']['organisations']

@@ -56,6 +56,7 @@ def scrape(scraper, tree):
     # if that's the page type we're looking at then the comment is in {"description": {"summary": <THIS> }}
     # otherwise, look in the markdown field (adhoc notes about a page)
     # for page types other than dataset_landing_page, the markdown field can be quite long, so we truncate
+    # TODO, depends on outcome of https://github.com/GSS-Cogs/gss-utils/issues/308
     page_type = landing_page["type"]
     if page_type == "dataset_landing_page":
         scraper.dataset.comment = landing_page["description"]["summary"].strip()

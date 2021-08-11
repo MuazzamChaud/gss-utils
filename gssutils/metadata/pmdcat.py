@@ -68,5 +68,8 @@ class Dataset(dcat.Dataset):
             #       in PMD and the last modification datetime of the dataset by the publisher.
             value = datetime.now(timezone.utc).astimezone()
         elif key == 'description':
+            # TODO: evaluate whether pmdcat:markdownDescription rdfs:subPropertyOf dct:description
+            #       and if so, this is the wrong way around.
+            #       See https://github.com/GSS-Cogs/gss-utils/issues/308
             self.markdownDescription = value
         super().__setattr__(key, value)
