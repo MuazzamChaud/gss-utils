@@ -261,6 +261,7 @@ Feature: Scrape dataset info
     When I select the latest dataset whose title starts with "Regional trade in goods statistics disaggregated by smaller geographical areas"
     Then the comment should be "International trade in goods data at summary product and country level, by UK areas smaller than NUTS1."
     And the description should start "HM Revenue & Customs (HMRC) collects the UK’s international trade in goods"
+    And dct:description should match `HM Revenue & Customs \(HMRC\) collects the UK’s international trade in goods*`
 
   Scenario: latest distribution but no issued date
     Given I scrape the page "https://www.gov.uk/government/statistics/alcohol-bulletin"
