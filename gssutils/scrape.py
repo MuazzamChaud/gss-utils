@@ -379,6 +379,7 @@ class Scraper:
         catalog.record.label = self.dataset.label + " Catalog Record"
         catalog.record.metadataGraph = metadata_graph
         catalog.record.issued = self.dataset.issued
+        catalog.record.modified = self.dataset.modified
         catalog.record.primaryTopic = self.dataset
         # need to ensure that all the pointed to things are in the same graph
         if hasattr(catalog.record.primaryTopic, 'distribution'):

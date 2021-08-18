@@ -10,6 +10,7 @@ Feature: PMD metadata
     And set the theme to <business-industry-trade-energy>
     And set the family to 'trade'
     And set the license to 'OGLv3'
+    And set the modified time to '2018-09-14T10:04:33.141484+01:00'
     And set the description to 'Inward Foreign Direct Investment (FDI) Involving UK Companies, 2016 (Directional Principle)'
     And generate TriG
     Then the TriG should contain
@@ -57,6 +58,10 @@ Feature: PMD metadata
     Scenario: licensed dataset
       Given I scrape the page "https://www.ons.gov.uk/businessindustryandtrade/business/businessinnovation/datasets/foreigndirectinvestmentinvolvingukcompanies2013inwardtables"
       Then dct:license should be `<http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/>`
+
+    Scenario: modified or updated
+      Given I scrape the page "https://www.gov.uk/government/statistics/immigration-statistics-october-to-december-2017-data-tables"
+      Then the modified date should be around "2018-03-21"
 
     Scenario: catalog scraped datasets
       Given the 'JOB_NAME' environment variable is 'GSS_data/Health/ISD-Drugs-and-Alcohol'

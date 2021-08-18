@@ -1,5 +1,3 @@
-from datetime import datetime, timezone
-
 from rdflib import URIRef, Literal
 from rdflib.namespace import VOID
 
@@ -63,10 +61,6 @@ class Dataset(dcat.Dataset):
             self.label = value
         elif key == 'publisher':
             self.creator = value
-        elif key == 'modified':
-            # TODO: remove the following once we distinguish between the modification datetime of a dataset
-            #       in PMD and the last modification datetime of the dataset by the publisher.
-            value = datetime.now(timezone.utc).astimezone()
         elif key == 'description':
             # TODO: evaluate whether pmdcat:markdownDescription rdfs:subPropertyOf dct:description
             #       and if so, this is the wrong way around.
