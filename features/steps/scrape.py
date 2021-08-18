@@ -1,4 +1,6 @@
 import os
+import ast
+from collections import OrderedDict
 from urllib.parse import urlparse
 
 import requests
@@ -84,6 +86,12 @@ def step_impl(context, date):
     assert_regexp_matches(context.scraper.next_release, date)
 
 
+@step('the description should be "{description}"')
+def step_impl(context, description):
+    # TODO: Behave escapes '\n' strings in steps. Workaround for now.
+    eq_(context.scraper.dataset.description, description.replace("\\n", "\n"))
+
+
 @step('the description should start "{description}"')
 def step_impl(context, description):
     ok_(context.scraper.description.startswith(description))
@@ -92,6 +100,13 @@ def step_impl(context, description):
 @step('the contact email address should be "{email}"')
 def step_impl(context, email):
     assert_equal(context.scraper.contact, email)
+
+
+@step('the keywords should be "{keywords}"')
+def step_impl(context, keywords):
+    # An awkward workaround to deal with the fact that keywords are a list
+    # https://stackoverflow.com/questions/1894269/how-to-convert-string-representation-of-list-to-a-list
+    assert_equal(set(context.scraper.dataset.keyword), set(ast.literal_eval(keywords)))
 
 
 @step('there should be "{num_of_distributions}" distributions')
@@ -103,7 +118,13 @@ def step_impl(context, num_of_distributions):
 @then("{prefix}:{property} should be `{object}`")
 def step_impl(context, prefix, property, object):
     ns = {'dct': DCTERMS, 'dcat': DCAT, 'rdfs': RDFS}.get(prefix)
-    assert_equal(context.scraper.dataset.get_property(ns[property]).n3(namespaces), object)
+    properties = context.scraper.dataset.get_property(ns[property])
+    if isinstance(properties, list):
+        properties = set(list(map(lambda t: t.n3(namespaces), properties)))
+        object = set(ast.literal_eval(object))
+    else :
+        properties = properties.n3(namespaces)
+    assert_equal(properties, object)
 
 
 @then("{prefix}:{property} should match `{object}`")
@@ -181,7 +202,7 @@ def step_impl(context):
                           record_mode=context.config.userdata.get('record_mode',
                                                                   DEFAULT_RECORD_MODE)):
         context.pandas = context.distribution.as_pandas()
-        eq_(type(context.pandas), dict)
+        assert type(context.pandas) in [OrderedDict, dict]
 
 
 @step("all mandatory fields are set")
@@ -234,4 +255,4 @@ def step_impl(context, url):
 
 @step("the markdown representation should start with")
 def step_impl(context):
-    assert(context.scraper._repr_markdown_().startswith(context.text))
+    eq_(context.scraper._repr_markdown_()[:len(context.text)], context.text)

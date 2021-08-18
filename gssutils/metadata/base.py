@@ -74,7 +74,11 @@ class Metadata(Resource):
         for k in self._properties_metadata:
             prop, status, f = self._properties_metadata[k]
             if prop == p:
-                obs.append(f(self.__dict__[k]))
+                if isinstance(self.__dict__[k], list):
+                    objects = list(map(lambda x: f(x), self.__dict__[k]))
+                    obs.extend(objects)
+                else:
+                    obs.append(f(self.__dict__[k]))
         if len(obs) == 0:
             return None
         elif len(obs) == 1:

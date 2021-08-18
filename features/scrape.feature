@@ -9,6 +9,7 @@ Feature: Scrape dataset info
     And the publication date should match "20[0-9]{2}-[01][0-9]-[0-3][0-9]"
     And the comment should be "Annual statistics on the investment of foreign companies into the UK, including for investment flows, positions and earnings."
     And the contact email address should be "mailto:fdi@ons.gov.uk"
+    And the keywords should be "['business investment', 'stocks', 'investment flows']"
 
   Scenario: ONS metadata profile
     Given I scrape the page "https://www.ons.gov.uk/businessindustryandtrade/business/businessinnovation/datasets/foreigndirectinvestmentinvolvingukcompanies2013inwardtables"
@@ -17,6 +18,7 @@ Feature: Scrape dataset info
     And dct:publisher should be `gov:office-for-national-statistics`
     And dct:issued should match `"20[0-9]{2}-[01][0-9]-[0-3][0-9]"\^\^xsd:date`
     And dcat:contactPoint should be `<mailto:fdi@ons.gov.uk>`
+    And dcat:keyword should be `['"business investment"@en', '"stocks"@en', '"investment flows"@en']`
 
   Scenario: Scrape gov.uk template
     Given I scrape the page "https://www.gov.uk/government/statistics/immigration-statistics-october-to-december-2017-data-tables"
@@ -40,9 +42,9 @@ Feature: Scrape dataset info
   Scenario: nrscotland downloads
     Given I scrape the page "https://www.nrscotland.gov.uk/statistics-and-data/statistics/statistics-by-theme/migration/migration-statistics/migration-flows/migration-between-scotland-and-overseas"
     And select the distribution given by
-      | key       | value                                                      |
-      | mediaType | application/vnd.ms-excel                                   |
-      | title     | Migration between administrative areas and overseas by sex |
+      | key       | value                                                               |
+      | mediaType | application/vnd.openxmlformats-officedocument.spreadsheetml.sheet   |
+      | title     | Migration between administrative areas and overseas by sex          |
     Then the data can be downloaded from "https://www.nrscotland.gov.uk/files//statistics/migration/flows/apr-20/mig-overseas-admin-sex-tab1.xlsx"
 
   Scenario: Scrape NISRA
@@ -99,6 +101,12 @@ Feature: Scrape dataset info
     And the comment should be "Exports and imports goods data by individual country for UK trade in goods."
     And the data can be downloaded from "https://www.ons.gov.uk/file?uri=/economy/nationalaccounts/balanceofpayments/adhocs/008596individualcountrydatagoodsonamonthlybasisfromjanuary1998toapril2018/04.allcountriesapril2018.xls"
 
+  Scenario: Scrape ONS User Requested Data and get an appropriate comment/description
+    Given I scrape the page "https://www.ons.gov.uk/economy/economicoutputandproductivity/output/adhocs/13524businessinsightsandconditionssurveybicswave33adhoctablesdepartmentfortransport"
+    Then the title should match "Business Insights and Conditions Survey \(BICS\) wave 33 ad-hoc tables: Department for Transport"
+    And the comment should be "Ad Hoc tables for the Department for Transport. The weighted table included is a crosstab of returning to work questions that was not published in the weighted Business Insights and Conditions Survey (BICS) Wave 33 results."
+    And the description should be "Ad Hoc tables for the Department for Transport. The weighted table included is a crosstab of returning to work questions that was not published in the weighted Business Insights and Conditions Survey (BICS) Wave 33 results. \n\nThe sample design for BICS was reviewed and refreshed in Wave 17 and will be the basis for future waves.  This sample redesign improves our coverage for the smaller sized businesses. \n\nThe survey was sent to around 39,000 UK businesses, and results presented in this release are based on a limited number of responses, around 25.0% (9,645) of all businesses surveyed who responded.\n\n### Contact\nFor more information on this request please email <bics@ons.gov.uk>."
+
   Scenario: Scrape DoH Northern Ireland
     Given I scrape the page "https://www.health-ni.gov.uk/publications/census-drug-and-alcohol-treatment-services-northern-ireland-2017"
     Then dct:publisher should be `gov:department-of-health-northern-ireland`
@@ -149,7 +157,7 @@ Feature: Scrape dataset info
     When I select the latest dataset whose title starts with "Substance misuse treatment for adults"
     Then dct:title should match `"Substance misuse treatment for adults: statistics.*"@en`
     And dct:publisher should be `gov:public-health-england`
-    And dct:description should match `.*alcohol and drug misuse treatment for adults from Public Health England's National Drug Treatment Monitoring System.*`
+    And dct:description should match `.*Public Health England collects data on patients receiving substance.*`
 
   Scenario: Scrape NHS digital
     Given I scrape the page "https://digital.nhs.uk/data-and-information/publications/statistical/statistics-on-alcohol"
@@ -196,9 +204,9 @@ Feature: Scrape dataset info
   Scenario: ONS MRETS as csv, xlsx and structured text
     Given I scrape the page "https://www.ons.gov.uk/economy/nationalaccounts/balanceofpayments/datasets/tradeingoodsmretsallbopeu2013timeseriesspreadsheet"
     And select the distribution given by
-      | key       | value                                                                    |
-      | mediaType | application/vnd.ms-excel        |
-      | latest    | true                            |
+      | key       | value                                                                     |
+      | mediaType | application/vnd.openxmlformats-officedocument.spreadsheetml.sheet         |
+      | latest    | true                                                                      |
     Then the data can be downloaded from "https://www.ons.gov.uk/file?uri=/economy/nationalaccounts/balanceofpayments/datasets/tradeingoodsmretsallbopeu2013timeseriesspreadsheet/current/mret.xlsx"
     And select the distribution given by
       | key       | value                           |
@@ -251,7 +259,9 @@ Feature: Scrape dataset info
     Given I scrape the page "https://www.gov.uk/government/collections/uk-regional-trade-in-goods-statistics-disaggregated-by-smaller-geographical-areas"
     And the catalog has more than one dataset
     When I select the latest dataset whose title starts with "Regional trade in goods statistics disaggregated by smaller geographical areas"
-    Then the description should start "International trade in goods data at summary product and country level, by UK areas smaller than NUTS1"
+    Then the comment should be "International trade in goods data at summary product and country level, by UK areas smaller than NUTS1."
+    And the description should start "HM Revenue & Customs (HMRC) collects the UK’s international trade in goods"
+    And dct:description should match `HM Revenue & Customs \(HMRC\) collects the UK’s international trade in goods*`
 
   Scenario: latest distribution but no issued date
     Given I scrape the page "https://www.gov.uk/government/statistics/alcohol-bulletin"
@@ -302,9 +312,11 @@ Feature: Scrape dataset info
     """
     ## Alcohol Bulletin
 
+    Monthly statistics from the 4 different alcohol duty regimes administered by HM Revenue and Customs.
+
     ### Description
 
-    Monthly statistics from the 4 different alcohol duty regimes
+    This National Statistics publication presents statistics
     """
 
   Scenario: gov.uk guidance page

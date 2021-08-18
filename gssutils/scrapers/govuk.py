@@ -5,6 +5,7 @@ from urllib.parse import urljoin, urlparse
 
 from lxml import html
 import json
+import html2text
 
 from gssutils.metadata import GOV
 from gssutils.metadata.dcat import Distribution
@@ -84,7 +85,10 @@ def content_api_publication(scraper, metadata):
     if 'title' in metadata:
         ds.title = metadata['title']
     if 'description' in metadata:
-        ds.description = metadata['description']
+        ds.comment = metadata['description']
+    if 'details' in metadata:
+        # TODO, depends on outcome of https://github.com/GSS-Cogs/gss-utils/issues/308
+        ds.description = html2text.html2text(metadata["details"]["body"])
     if 'api_url' in metadata:
         doc_info = scraper.session.get(metadata['api_url']).json()
     else:
@@ -94,7 +98,10 @@ def content_api_publication(scraper, metadata):
     if 'public_updated_at' in doc_info:
         ds.modified = datetime.fromisoformat(doc_info['public_updated_at'])
     if 'description' in doc_info:
-        ds.description = doc_info['description']
+        ds.comment = doc_info['description']
+    if 'description' in doc_info:
+        # TODO, depends on outcome of https://github.com/GSS-Cogs/gss-utils/issues/308
+        ds.description = html2text.html2text(doc_info["details"]["body"]) 
     if 'links' in doc_info and 'organisations' in doc_info['links']:
         orgs = doc_info['links']['organisations']
         if len(orgs) == 0:

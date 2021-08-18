@@ -637,3 +637,57 @@ Scenario: Manually Overriding CSV-W's graph URI works.
       dim:timezone <http://gss-data.org.uk/data/gss_data/something/something#concept/timezone/eu/london> .
 
     """
+
+  Scenario: dimension order from CSV column order
+    Given a CSV file 'observations.csv'
+      | Place    | Year | Sex | Life Expectancy |
+      | Bradford | 1970 | M   | 84              |
+    And a column map
+    """
+    {
+      "Place": {
+        "dimension": "http://purl.org/linked-data/sdmx/2009/dimension#refArea",
+        "value": "http://statistics.data.gov.uk/id/statistical-geography/{place}"
+      },
+      "Year": {
+        "dimension": "http://purl.org/linked-data/sdmx/2009/dimension#refPeriod",
+        "value": "http://reference.data.gov.uk/id/year/{year}"
+      },
+      "Sex": {
+        "dimension": "http://purl.org/linked-data/sdmx/2009/dimension#sex",
+        "value": "http://purl.org/linked-data/sdmx/2009/code#sex-{sex}"
+      },
+      "Life Expectancy": {
+        "unit": "http://gss-data.org.uk/def/concept/measurement-units/years",
+        "measure": "http://gss-data.org.uk/def/measure/life-expectancy",
+        "datatype": "integer"
+      }
+    }
+    """
+    And a dataset URI 'http://gss-data.org.uk/data/gss_data/something/something'
+    When I create a CSVW file from the mapping and CSV
+    Then the metadata is valid JSON-LD
+    And gsscogs/csvlint validates ok
+    And gsscogs/csv2rdf generates RDF
+    And the RDF should contain
+    """
+    @prefix qb: <http://purl.org/linked-data/cube#> .
+    @prefix dim: <http://gss-data.org.uk/data/gss_data/something/something#dimension/> .
+    @prefix meas: <http://gss-data.org.uk/def/measure/> .
+    @prefix eg: <http://gss-data.org.uk/data/gss_data/something/something#> .
+    @prefix eg-comp: <http://gss-data.org.uk/data/gss_data/something/something#component/> .
+    @prefix sdmx-dimension: <http://purl.org/linked-data/sdmx/2009/dimension#> .
+    @prefix sdmx-attribute: <http://purl.org/linked-data/sdmx/2009/attribute#> .
+    @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+    # From https://www.w3.org/TR/vocab-data-cube/#attachment-example with a little re-arranging
+    eg:structure a qb:DataStructureDefinition;
+        qb:component eg-comp:place, eg-comp:year, eg-comp:sex, eg-comp:life-expectancy, eg-comp:unit .
+
+    eg-comp:place qb:dimension sdmx-dimension:refArea; qb:order "1"^^xsd:long .
+    eg-comp:year  qb:dimension sdmx-dimension:refPeriod; qb:order "2"^^xsd:long .
+    eg-comp:sex   qb:dimension sdmx-dimension:sex; qb:order "3"^^xsd:long .
+
+    eg-comp:life-expectancy qb:measure meas:life-expectancy .
+    eg-comp:unit            qb:attribute sdmx-attribute:unitMeasure .
+    """

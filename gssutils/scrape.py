@@ -136,6 +136,8 @@ class Scraper:
     def to_markdown(node):
         if type(node) == list:
             return html2text.html2text('\n'.join([html.tostring(n, encoding='unicode') for n in node]))
+        elif type(node) == str:
+            return html2text.html2text(node)
         else:
             return html2text.html2text(html.tostring(node, encoding='unicode'))
 

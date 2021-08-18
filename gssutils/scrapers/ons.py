@@ -46,9 +46,7 @@ def scrape(scraper, tree):
 
     # Acquire title and description from the page json
     # literally just whatever's in {"description": {"title": <THIS> }}
-    # and {"description": {"metaDescription": <THIS> }}
     scraper.dataset.title = landing_page["description"]["title"].strip()
-    scraper.dataset.description = landing_page["description"]["metaDescription"]
 
     # Same with date, but use parse_as_local_date() which converts to the right time type
     scraper.dataset.issued = parse_as_local_date(landing_page["description"]["releaseDate"])
@@ -57,11 +55,15 @@ def scrape(scraper, tree):
     # the most common one for datasets is dataset_landing_page
     # if that's the page type we're looking at then the comment is in {"description": {"summary": <THIS> }}
     # otherwise, look in the markdown field (adhoc notes about a page)
+    # for page types other than dataset_landing_page, the markdown field can be quite long, so we truncate
+    # TODO, depends on outcome of https://github.com/GSS-Cogs/gss-utils/issues/308
     page_type = landing_page["type"]
     if page_type == "dataset_landing_page":
         scraper.dataset.comment = landing_page["description"]["summary"].strip()
+        scraper.dataset.description = landing_page["description"]["metaDescription"]
     else:
-        scraper.dataset.comment = landing_page["markdown"][0]
+        scraper.dataset.comment = landing_page["markdown"][0].split("\n")[0].strip()
+        scraper.dataset.description = landing_page["markdown"][0]
 
     # not all page types have a next Release date field, also - "to be announced" is useless as is a blank entry.
     # so if its present, not blank, and doesnt say "to be announced" get it as
@@ -86,6 +88,9 @@ def scrape(scraper, tree):
     except KeyError:
         # if we're skipping a field, we might want to know
         logging.debug("no description.contact key in json, skipping")
+
+    scraper.dataset.keyword = list(
+        set([x.strip() for x in landing_page["description"]["keywords"]]))
 
     # boiler plate
     scraper.dataset.publisher = 'https://www.gov.uk/government/organisations/office-for-national-statistics'
@@ -152,7 +157,7 @@ def handler_dataset_landing_page_fallback(scraper, this_dataset_page, tree):
     download_url = tree.xpath("//a[text()='xls']/@href")
     this_distribution.downloadURL = download_url
 
-    media_type = Excel
+    media_type = media_type, _ = mimetypes.guess_type(download_url)
     this_distribution.mediaType = media_type
 
     this_distribution.title = scraper.dataset.title
@@ -276,17 +281,11 @@ def handler_dataset_landing_page(scraper, landing_page, tree):
                 # by checking the download url ending
                 if download_url.endswith(".csdb"):
                     media_type = CSDB
-                elif download_url.endswith(".csv"):
-                    media_type = CSV
-                elif download_url.endswith(".xlsx"):
-                    media_type = Excel
-                elif download_url.endswith(".ods"):
-                    media_type = ODS
                 else:
                     media_type, _ = mimetypes.guess_type(download_url)
 
                 this_distribution.mediaType = media_type
-
+                
                 # inherit metadata from the dataset where it hasn't explicitly been changed
                 this_distribution.title = scraper.dataset.title
                 this_distribution.description = scraper.dataset.description
@@ -322,14 +321,9 @@ def handler_static_adhoc(scraper, landing_page, tree):
         # by checking the download url ending
         if download_url.endswith(".csdb"):
             media_type = CSDB
-        elif download_url.endswith(".csv"):
-            media_type = CSV
-        elif download_url.endswith(".xlsx"):
-            media_type = Excel
-        elif download_url.endswith(".ods"):
-            media_type = ODS
         else:
             media_type, _ = mimetypes.guess_type(download_url)
+
         this_distribution.mediaType = media_type
 
         this_distribution.title = title
