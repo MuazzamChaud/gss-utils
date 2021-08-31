@@ -93,7 +93,7 @@ class CSVWMapping:
 
     def set_input(self, filename: URI, stream: TextIO):
         self._csv_stream = stream
-        self._csv_filename = Path(str(filename)[:-3]) if str(filename).endswith(".csv.gz") else filename
+        self._csv_filename = Path(str(filename)[:-3]) if str(filename).endswith(".csv.gz") else Path(str(filename))
         reader = csv.DictReader(stream)
         self._column_names = reader.fieldnames
         for col in self._column_names:
@@ -494,7 +494,7 @@ class CSVWMapping:
     def _as_tables(self):
         table_uri = URI(Path(self._csv_filename).name)  # default is that metadata is filename + '-metadata.json'
         if self._metadata_filename is not None:
-            table_uri = URI(self._csv_filename.relative_to(self._metadata_filename.parent))
+            table_uri = URI(str(self._csv_filename.relative_to(self._metadata_filename.parent)))
         main_table = Table(
             url=table_uri,
             tableSchema=TableSchema(
