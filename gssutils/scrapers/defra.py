@@ -1,13 +1,13 @@
 from dateutil.parser import parse
 import logging
 import mimetypes
-from urllib.parse import urlparse
+from urllib.parse import urljoin
 
 from lxml import html
 from lxml.html import HtmlElement
 from requests import Response
 
-from .helpers import assert_get_one, append_to_host_url
+from .helpers import assert_get_one
 from gssutils.metadata.dcat import Distribution
 from gssutils.metadata.pmdcat import Dataset
 from gssutils.metadata import GOV
@@ -27,7 +27,7 @@ def scrape(scraper, tree: HtmlElement):
 
     relative_contact_url = assert_get_one(tree.xpath('//a[contains(text(), "Contact us")]'),
         'Contact link <a> from footer').get("href")
-    contact_url = append_to_host_url(scraper.uri, relative_contact_url)
+    contact_url = urljoin(scraper.uri, relative_contact_url)
     r: Response = scraper.session.get(contact_url)
     if not r.ok:
         logging.warning('Unable to acquire contact point. You\'ll need to set this manually.')
@@ -39,7 +39,7 @@ def scrape(scraper, tree: HtmlElement):
 
     for dataset_element in tree.xpath("//body/div[@id='main-content']/div/div/div/span/a"):
         identifier = dataset_element.get("href")
-        dataset_url = append_to_host_url(scraper.uri, identifier)
+        dataset_url = urljoin(scraper.uri, identifier)
         dataset = scrape_dataset(scraper, dataset_url, contact_point, identifier)
         if dataset:
             scraper.catalog.dataset.append(dataset)
@@ -99,7 +99,7 @@ def scrape_dataset(scraper, dataset_uri: str, contact_point: str, identifier: st
     distribution = Distribution(scraper)
 
     distribution.title = " ".join(dataset.title.split(" ")[1:])
-    distribution.downloadURL = append_to_host_url(scraper.uri, f'/en/data/{identifier}.csv')
+    distribution.downloadURL = urljoin(scraper.uri, f'/en/data/{identifier}.csv')
     distribution.issued = dataset.issued
 
     distribution.mediaType, _ = mimetypes.guess_type(distribution.downloadURL)
