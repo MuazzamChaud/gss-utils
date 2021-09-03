@@ -31,6 +31,7 @@ def scrape(scraper, tree: HtmlElement):
     r: Response = scraper.session.get(contact_url)
     if not r.ok:
         logging.warning('Unable to acquire contact point. You\'ll need to set this manually.')
+        contact_point = ""
     else:
         contact_tree = html.fromstring(r.text)
         contact_point = assert_get_one(contact_tree.xpath("//address[@id='address-email']"),
