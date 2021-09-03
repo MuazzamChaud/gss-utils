@@ -14,7 +14,7 @@ from gssutils.metadata import GOV
 
 def scrape(scraper, tree: HtmlElement):
     """
-    We're treating the idicators landing page as a catalog. With each
+    We're treating the indicators landing page as a catalog. With each
     of the indicators linked from the page being a dataset.
 
     Here's an example of a catalog page: https://oifdata.defra.gov.uk/2/
@@ -63,7 +63,7 @@ def scrape_dataset(scraper, dataset_uri: str, contact_point: str, identifier: st
     title_element: HtmlElement = assert_get_one(tree.xpath('//h1'), 'title of dataset')
     dataset.title = title_element.text_content().strip()
 
-    # To create the description, starting with the first <div> of the page contnet,
+    # To create the description, starting with the first <div> of the page content,
     # we want the text from all the the paragraph <p> elements
     # between the first and second headings <h2> elements.
     page_content_elements: HtmlElement = assert_get_one(tree.xpath("//div[@id='page-content']/div"), 
@@ -97,8 +97,7 @@ def scrape_dataset(scraper, dataset_uri: str, contact_point: str, identifier: st
     distribution = Distribution(scraper)
 
     distribution.title = " ".join(dataset.title.split(" ")[1:])
-    host = urlparse(scraper.uri).hostname
-    distribution.downloadURL = f'{host}/en/data/{identifier}.csv'
+    distribution.downloadURL = append_to_host_url(scraper.uri, f'/en/data/{identifier}.csv')
     distribution.issued = dataset.issued
 
     distribution.mediaType, _ = mimetypes.guess_type(distribution.downloadURL)
