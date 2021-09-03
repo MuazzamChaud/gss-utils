@@ -12,6 +12,6 @@ def assert_get_one(thing: HtmlElement, name_of_thing: str) -> (HtmlElement):
 
 def append_to_host_url(current_url: str, relative_url: str) -> (str):
     """Append a relative url to the host url"""
-    schema = urlparse(current_url).scheme
+    scheme = urlparse(current_url).scheme
     host = urlparse(current_url).hostname
-    return f'{schema}://{host}{relative_url}'
+    return f'{scheme}://{host}{relative_url}'
