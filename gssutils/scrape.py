@@ -103,7 +103,7 @@ class Scraper:
 
     def _repr_markdown_(self):
         md = ""
-        if hasattr(self.catalog, 'dataset') and len(self.catalog.dataset) > 0 and len(self.distributions) == 0:
+        if hasattr(self.catalog, 'dataset') and len(self.catalog.dataset) > 1 and len(self.distributions) == 0:
             md = md + f'## {self.catalog.title}\n\nThis is a catalog of datasets; choose one from the following:\n\n'
             md = md + '\n'.join([f'* {d.label}' for d in self.catalog.dataset])
         else:
