@@ -83,6 +83,8 @@ def scrape_dataset(scraper, dataset_uri: str, contact_point: str, identifier: st
 
     dataset.description = description_text
 
+    dataset.license = assert_get_one(tree.xpath("//div[@id='oglLicense']/a"), "licence in use").get("href")
+
     # we want the text from a table row <tr> that contains a table header <th> of text "Date last updated"
     issued_row_element = assert_get_one(tree.xpath("//tr/th[contains(text(),'Date last updated')]/parent::*"),
         'table row that contains header text of "Date last updated"')
