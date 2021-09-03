@@ -1,4 +1,4 @@
-from gssutils.scrapers import ons, onscmd, govuk, nrscotland, nisra, hmrc, ni_govuk, isd_scotland, nhs_digital, statswales,\
+from gssutils.scrapers import ons, onscmd, defra, govuk, nrscotland, nisra, hmrc, ni_govuk, isd_scotland, nhs_digital, statswales,\
     govscot, dcni, govwales, lcc
 
 scraper_list = [
@@ -23,5 +23,6 @@ scraper_list = [
     ('https://www.communities-ni.gov.uk/publications/topic', dcni.scrape),
     ('https://gov.wales/', govwales.scrape),
     ('https://www.lowcarboncontracts.uk/data-portal/dataset', lcc.scrape),
-    ('https://www.gov.uk/guidance', govuk.content_api)
+    ('https://www.gov.uk/guidance', govuk.content_api),
+    ('https://oifdata.defra.gov.uk', defra.scrape)
 ]

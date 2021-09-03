@@ -127,6 +127,15 @@ Feature: Scrape dataset info
     And the publication date should match "20[0-9]{2}-[01][0-9]-[0-3][0-9]"
     And the data download URL should match "^https://www.communities-ni.gov.uk/.*[xX][lL][sS][xX]$"
 
+  Scenario: Scrape DEFRA Indicators
+    Given I scrape the page "https://oifdata.defra.gov.uk/2"
+    And the catalog has more than one dataset
+    When I select the latest dataset whose title starts with "B1: Pollution loads entering waters"
+    Then dct:title should match `"B1: Pollution loads entering waters"@en`
+    And dct:publisher should be `gov:department-for-environment-food-rural-affairs`
+    And dct:description should match `.*track changes in the inputs and discharges of selected contaminants such as nutrients and some toxic chemicals.*`
+    And dcat:contactPoint should be `<mailto:25YEPindicators@defra.gov.uk>`
+
   Scenario: Cope with bad mailto URIs
     Given I scrape the page "https://www.ons.gov.uk/economy/nationalaccounts/balanceofpayments/datasets/tradeingoodsmretsallbopeu2013timeseriesspreadsheet"
     Then the title should be "UK trade time series"
