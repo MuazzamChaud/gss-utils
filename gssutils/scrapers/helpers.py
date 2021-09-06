@@ -1,5 +1,7 @@
+from lxml.html import HtmlElement
+from urllib.parse import urlparse
 
-def assert_get_one(thing, name_of_thing):
+def assert_get_one(thing: HtmlElement, name_of_thing: str) -> (HtmlElement):
     """
     Helper to assert we have one of a thing when we're expecting one of a thing, then
     return that one thing de-listified
