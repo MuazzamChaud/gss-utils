@@ -21,11 +21,11 @@ from gssutils.utils import pathify, ensure_list, recordable
 
 
 class BiggerSerializer(serialize.Serializer):
-
     def _loads_v4(self, request, data):
         try:
             cached = msgpack.loads(
-                data, raw=False, max_bin_len=100 * 1000 * 1000)  # 100MB
+                data, raw=False, max_bin_len=100 * 1000 * 1000
+            )  # 100MB
         except ValueError:
             return
 
@@ -33,29 +33,26 @@ class BiggerSerializer(serialize.Serializer):
 
 
 class FilterError(Exception):
-    """ Raised when filters don't uniquely identify a thing
-    """
+    """Raised when filters don't uniquely identify a thing"""
 
     def __init__(self, message):
         self.message = message
 
 
 class MetadataError(Exception):
-    """ Raised when there is an issue with a provided metadata seed
-    """
+    """Raised when there is an issue with a provided metadata seed"""
 
     def __init__(self, message):
         self.message = message
 
 
 class Scraper:
-
-    def __init__(self, uri: str = None, session: requests.Session = None, seed: str = None):
+    def __init__(
+        self, uri: str = None, session: requests.Session = None, seed: str = None
+    ):
 
         # Airtable and gssutils are using slightly different field names....
-        self.meta_field_mapping = {
-            "published": "issued"
-        }
+        self.meta_field_mapping = {"published": "issued"}
 
         # Add an explicit on/off for temp scraping (based on presence of dataURL)
         self.temp_scrape = False
@@ -65,11 +62,15 @@ class Scraper:
             with open(seed, "r") as f:
                 self.seed = json.load(f)
                 if "dataURL" in self.seed:
-                    logging.warning("A temporary dataURL has been specified; proceeding with a temp scrape.")
+                    logging.warning(
+                        "A temporary dataURL has been specified; proceeding with a temp scrape."
+                    )
                     self.temp_scrape = True
                 if "landingPage" not in self.seed.keys():
-                    raise MetadataError('We always need to provide a "landingPage" via the seed. Either' \
-                                    ' it\'s own or alongside a dataURL for temporary scrapes.')
+                    raise MetadataError(
+                        'We always need to provide a "landingPage" via the seed. Either'
+                        " it's own or alongside a dataURL for temporary scrapes."
+                    )
                 uri = self.seed["landingPage"]
         else:
             self.seed = None
@@ -82,52 +83,65 @@ class Scraper:
 
         if session:
             self.session = session
-        elif 'RECORD_MODE' in os.environ:
+        elif "RECORD_MODE" in os.environ:
             # don't use cachecontrol, but we'll need to patch the session when used.
             self.session = requests.Session()
         else:
-            self.session = CacheControl(requests.Session(),
-                                        cache=FileCache('.cache'),
-                                        serializer=BiggerSerializer(),
-                                        heuristic=LastModified())
+            self.session = CacheControl(
+                requests.Session(),
+                cache=FileCache(".cache"),
+                serializer=BiggerSerializer(),
+                heuristic=LastModified(),
+            )
 
-        if 'JOB_NAME' in os.environ:
-            self._base_uri = URIRef('http://gss-data.org.uk')
-            self._dataset_id = pathify(os.environ['JOB_NAME'])
+        if "JOB_NAME" in os.environ:
+            self._base_uri = URIRef("http://gss-data.org.uk")
+            self._dataset_id = pathify(os.environ["JOB_NAME"])
         else:
             self._base_uri = BNode()
             parsed_scrape_uri = urlparse(self.uri)
-            self._dataset_id = parsed_scrape_uri.netloc.replace('.', '/') + parsed_scrape_uri.path
+            self._dataset_id = (
+                parsed_scrape_uri.netloc.replace(".", "/") + parsed_scrape_uri.path
+            )
         self.update_dataset_uris()
         self._run()
 
     def _repr_markdown_(self):
         md = ""
-        if hasattr(self.catalog, 'dataset') and len(self.catalog.dataset) > 1 and len(self.distributions) == 0:
-            md = md + f'## {self.catalog.title}\n\nThis is a catalog of datasets; choose one from the following:\n\n'
-            md = md + '\n'.join([f'* {d.label}' for d in self.catalog.dataset])
+        if (
+            hasattr(self.catalog, "dataset")
+            and len(self.catalog.dataset) > 1
+            and len(self.distributions) == 0
+        ):
+            md = (
+                md
+                + f"## {self.catalog.title}\n\nThis is a catalog of datasets; choose one from the following:\n\n"
+            )
+            md = md + "\n".join([f"* {d.label}" for d in self.catalog.dataset])
         else:
-            if hasattr(self.dataset, 'label'):
-                md = md + f'## {self.dataset.label}\n\n'
-            if hasattr(self.dataset, 'comment'):
-                md = md + f'{self.dataset.comment}\n\n'
-            if hasattr(self.dataset, 'description'):
-                md = md + f'### Description\n\n{self.dataset.description}\n\n'
+            if hasattr(self.dataset, "label"):
+                md = md + f"## {self.dataset.label}\n\n"
+            if hasattr(self.dataset, "comment"):
+                md = md + f"{self.dataset.comment}\n\n"
+            if hasattr(self.dataset, "description"):
+                md = md + f"### Description\n\n{self.dataset.description}\n\n"
             if len(self.distributions) > 0:
                 md = md + "### Distributions\n\n"
                 for d in self.distributions:
+
                     def mediaType_label(d):
-                        mt = getattr(d, 'mediaType', '*unknown*')
+                        mt = getattr(d, "mediaType", "*unknown*")
                         return {
-                            mimetype.Excel: 'MS Excel Spreadsheet',
-                            mimetype.ODS: 'ODF Spreadsheet'
+                            mimetype.Excel: "MS Excel Spreadsheet",
+                            mimetype.ODS: "ODF Spreadsheet",
                         }.get(mt, mt)
+
                     md = md + f"1. {getattr(d, 'title', '*no title*')}"
-                    if hasattr(d, 'downloadURL'):
+                    if hasattr(d, "downloadURL"):
                         md = md + f" ([{mediaType_label(d)}]({d.downloadURL}))"
                     else:
                         md = md + f" ({mediaType_label(d)}, *no download URL*)"
-                    if hasattr(d, 'issued'):
+                    if hasattr(d, "issued"):
                         md = md + f" - {d.issued}"
                     md = md + "\n"
 
@@ -136,11 +150,13 @@ class Scraper:
     @staticmethod
     def to_markdown(node):
         if type(node) == list:
-            return html2text.html2text('\n'.join([html.tostring(n, encoding='unicode') for n in node]))
+            return html2text.html2text(
+                "\n".join([html.tostring(n, encoding="unicode") for n in node])
+            )
         elif type(node) == str:
             return html2text.html2text(node)
         else:
-            return html2text.html2text(html.tostring(node, encoding='unicode'))
+            return html2text.html2text(html.tostring(node, encoding="unicode"))
 
     @recordable
     def _run(self):
@@ -151,13 +167,13 @@ class Scraper:
             temp_uri = self.seed["dataURL"]
             page = self.session.get(temp_uri)
             scraped = self._attempt_scraper_from_seed()
-            
+
         # Using a standard scraper
         else:
             page = self.session.get(self.uri)
             # TODO - not all scrapers will necessarily need the beautified HTML DOM
             tree = html.fromstring(page.text)
-            
+
             # Look for a scraper based on the uri
             for start_uri, scrape in gssutils.scrapers.scraper_list:
                 if self.uri.startswith(start_uri):
@@ -172,7 +188,9 @@ class Scraper:
                     break
 
         if not scraped:
-            raise NotImplementedError(f'No scraper for {self.uri} and insufficient seed metadata passed.')
+            raise NotImplementedError(
+                f"No scraper for {self.uri} and insufficient seed metadata passed."
+            )
 
         # Apply overrides to either method of scraping
         if self.seed is not None:
@@ -187,30 +205,46 @@ class Scraper:
 
         try:
             # Dataset level metadata
-            if not hasattr(self.dataset, 'title') and "title" in self.seed.keys():
+            if not hasattr(self.dataset, "title") and "title" in self.seed.keys():
                 self.dataset.title = self.seed["title"]
-            if not hasattr(self.dataset, 'description') and "description" in self.seed.keys():
+            if (
+                not hasattr(self.dataset, "description")
+                and "description" in self.seed.keys()
+            ):
                 self.dataset.description = self.seed["description"]
-            if not hasattr(self.dataset, 'publisher') and "publisher" in self.seed.keys():
+            if (
+                not hasattr(self.dataset, "publisher")
+                and "publisher" in self.seed.keys()
+            ):
                 self.dataset.publisher = GOV[pathify(self.seed["publisher"])]
             if "families" in self.seed.keys():
-                if not hasattr(self.dataset, 'family'):
-                    self.dataset.family = [pathify(x) for x in self.seed["families"]] \
-                        if len(self.seed["families"]) > 0 else pathify(self.seed["families"][0])
-                if not hasattr(self.dataset, 'theme'):
-                    self.dataset.theme = [GDP[pathify(x)] for x in self.seed["families"]] \
-                        if len(self.seed["families"]) > 0 else GDP[pathify(self.seed["families"][0])]
-                
+                if not hasattr(self.dataset, "family"):
+                    self.dataset.family = (
+                        [pathify(x) for x in self.seed["families"]]
+                        if len(self.seed["families"]) > 0
+                        else pathify(self.seed["families"][0])
+                    )
+                if not hasattr(self.dataset, "theme"):
+                    self.dataset.theme = (
+                        [GDP[pathify(x)] for x in self.seed["families"]]
+                        if len(self.seed["families"]) > 0
+                        else GDP[pathify(self.seed["families"][0])]
+                    )
+
         except Exception as e:
-            raise MetadataError("Aborting. Issue encountered while attempting checking "
-                                "the info.json for supplementary metadata.") from e
+            raise MetadataError(
+                "Aborting. Issue encountered while attempting checking "
+                "the info.json for supplementary metadata."
+            ) from e
 
         # Populate missing distribution level Metadata
         for distribution in self.distributions:
 
             # NOTE - Don't EVER add a fallback for downloadURL or issued here!! this is a specific safety
             # to stop us "temporary scraping" and publishing new data with old metadata
-            if hasattr(distribution, 'downloadURL') and not hasattr(distribution, 'mediaType'):
+            if hasattr(distribution, "downloadURL") and not hasattr(
+                distribution, "mediaType"
+            ):
                 if distribution.downloadURL.lower().endswith(".xls"):
                     distribution.mediaType = mimetype.Excel
                 elif distribution.downloadURL.lower().endswith(".xlsx"):
@@ -223,7 +257,6 @@ class Scraper:
                     distribution.mediaType = mimetype.ZIP
                 else:
                     logging.warning("Unable to find mediaType for distribution")
-                
 
     def _override_metadata_where_specified(self):
         """
@@ -232,10 +265,7 @@ class Scraper:
         """
 
         # fields we should not be overridingm because it can lead to new data with old metadata
-        disallowed = [
-            "issued",
-            "downloadURL"
-        ]
+        disallowed = ["issued", "downloadURL"]
 
         if "overrides" not in self.seed.keys():
             return  # moot point
@@ -249,13 +279,21 @@ class Scraper:
                     target_field = field
 
                 if target_field in disallowed:
-                    raise MetadataError("Aborting, you cannot override the '{}' field.".format(target_field))
+                    raise MetadataError(
+                        "Aborting, you cannot override the '{}' field.".format(
+                            target_field
+                        )
+                    )
 
                 if not hasattr(self.dataset, target_field):
-                    raise MetadataError("Aborting. We've specified an override to the '{}' field"
-                                        "but the dataset does not have that attribute.".format(field))
+                    raise MetadataError(
+                        "Aborting. We've specified an override to the '{}' field"
+                        "but the dataset does not have that attribute.".format(field)
+                    )
                 self.dataset.__setattr__(target_field, self.seed[field])
-                self._propagate_metadata_to_distributions(target_field, self.seed[field])
+                self._propagate_metadata_to_distributions(
+                    target_field, self.seed[field]
+                )
 
     def _propagate_metadata_to_distributions(self, target_field, value):
         """
@@ -269,16 +307,20 @@ class Scraper:
                     if hasattr(distro, target_field):
                         distro.__setattr__(target_field, value)
             except Exception as e:
-                raise MetadataError("Aborting. Encountered issue propagating overritten metadata to"
-                                    " distributions within then dataset within the catalogue.") from e
+                raise MetadataError(
+                    "Aborting. Encountered issue propagating overritten metadata to"
+                    " distributions within then dataset within the catalogue."
+                ) from e
         else:
             try:
                 for distro in self.distributions:
                     if hasattr(distro, target_field):
                         distro.__setattr__(target_field, value)
             except Exception as e:
-                raise MetadataError("Aborting. Encountered issue propagating overritten metadata to"
-                                    " distributions within the dataset.") from e
+                raise MetadataError(
+                    "Aborting. Encountered issue propagating overritten metadata to"
+                    " distributions within the dataset."
+                ) from e
 
     def _attempt_scraper_from_seed(self):
         """
@@ -295,7 +337,7 @@ class Scraper:
 
         if len(not_found) > 0:
             raise NotImplementedError(
-                f'A "temporary scape" is not possible as the following required ' 
+                f'A "temporary scape" is not possible as the following required '
                 f'fields were missing from the seed metadata: {",".join(not_found)}. got: {",".join(self.seed.keys())}.'
             )
 
@@ -313,22 +355,31 @@ class Scraper:
 
     @staticmethod
     def _filter_one(things, **kwargs):
-        latest = kwargs.pop('latest', False)
+        latest = kwargs.pop("latest", False)
         matches = [
-            d for d in things if all(
-                [v(d.__dict__[k]) if callable(v) else (hasattr(d, k) and d.__dict__[k] == v)
-                 for k, v in kwargs.items()]
-            )]
+            d
+            for d in things
+            if all(
+                [
+                    v(d.__dict__[k])
+                    if callable(v)
+                    else (hasattr(d, k) and d.__dict__[k] == v)
+                    for k, v in kwargs.items()
+                ]
+            )
+        ]
         if len(matches) > 1:
             if latest:
-                if len([d for d in matches if not hasattr(d, 'issued')]) > 0:
-                    return matches[0]  # assume the publisher lists distributions in order of most to least recent.
+                if len([d for d in matches if not hasattr(d, "issued")]) > 0:
+                    return matches[
+                        0
+                    ]  # assume the publisher lists distributions in order of most to least recent.
                 else:
                     return max(matches, key=lambda d: d.issued)
             else:
-                raise FilterError('more than one match for given filter(s)')
+                raise FilterError("more than one match for given filter(s)")
         elif len(matches) == 0:
-            raise FilterError('nothing matches given filter(s)')
+            raise FilterError("nothing matches given filter(s)")
         else:
             return matches[0]
 
@@ -336,7 +387,9 @@ class Scraper:
         dataset = self._filter_one(self.catalog.dataset, **kwargs)
         self.dataset = dataset
         self.dataset.landingPage = self.uri
-        if not hasattr(self.dataset, 'description') and hasattr(self.catalog, 'description'):
+        if not hasattr(self.dataset, "description") and hasattr(
+            self.catalog, "description"
+        ):
             self.dataset.description = self.catalog.description
         self.dataset.modified = datetime.now()  # TODO: decision on modified date
         self.update_dataset_uris()
@@ -354,9 +407,11 @@ class Scraper:
         self.update_dataset_uris()
 
     def update_dataset_uris(self):
-        self.dataset.uri = urljoin(self._base_uri, f'data/{self._dataset_id}-catalog-entry')
+        self.dataset.uri = urljoin(
+            self._base_uri, f"data/{self._dataset_id}-catalog-entry"
+        )
         # Set the pmdcat:graph triple. It should point at the graph containing the qb:DataSet.
-        self.dataset.pmdcatGraph = urljoin(self._base_uri, f'graph/{self._dataset_id}')
+        self.dataset.pmdcatGraph = urljoin(self._base_uri, f"graph/{self._dataset_id}")
 
     def set_family(self, family):
         self.dataset.family = family
@@ -372,11 +427,13 @@ class Scraper:
         if catalog_id is not None:
             catalog.uri = urljoin(self._base_uri, catalog_id)
         else:
-            catalog.uri = urljoin(self._base_uri, 'catalog/datasets')
-        metadata_graph = urljoin(self._base_uri, f'graph/{self._dataset_id}-metadata')
+            catalog.uri = urljoin(self._base_uri, "catalog/datasets")
+        metadata_graph = urljoin(self._base_uri, f"graph/{self._dataset_id}-metadata")
         catalog.set_containing_graph(metadata_graph)
         catalog.record = pmdcat.CatalogRecord()
-        catalog.record.uri = urljoin(self._base_uri, f'data/{self._dataset_id}-catalog-record')
+        catalog.record.uri = urljoin(
+            self._base_uri, f"data/{self._dataset_id}-catalog-record"
+        )
         catalog.record.set_containing_graph(metadata_graph)
         catalog.record.label = self.dataset.label + " Catalog Record"
         catalog.record.metadataGraph = metadata_graph
@@ -384,21 +441,23 @@ class Scraper:
         catalog.record.modified = self.dataset.modified
         catalog.record.primaryTopic = self.dataset
         # need to ensure that all the pointed to things are in the same graph
-        if hasattr(catalog.record.primaryTopic, 'distribution'):
+        if hasattr(catalog.record.primaryTopic, "distribution"):
             for dist in ensure_list(catalog.record.primaryTopic.distribution):
                 dist.set_containing_graph(metadata_graph)
         self.dataset.set_containing_graph(metadata_graph)
         self.dataset.datasetContents = pmdcat.DataCube()
         self.dataset.datasetContents.set_containing_graph(metadata_graph)
-        self.dataset.datasetContents.uri = urljoin(self._base_uri, f'data/{self._dataset_id}#dataset')
-        self.dataset.sparqlEndpoint = urljoin(self._base_uri, '/sparql')
+        self.dataset.datasetContents.uri = urljoin(
+            self._base_uri, f"data/{self._dataset_id}#dataset"
+        )
+        self.dataset.sparqlEndpoint = urljoin(self._base_uri, "/sparql")
         quads = RDFDataset()
         quads.namespace_manager = namespaces
         catalog.add_to_dataset(quads)
         return quads
 
-    def generate_trig(self, catalog_id=None):
-        return self.as_quads(catalog_id).serialize(format='trig')
+    def generate_trig(self, catalog_id=None) -> bytes:
+        return self.as_quads(catalog_id).serialize(format="trig", encoding="uts-8")
 
     @property
     def title(self):
