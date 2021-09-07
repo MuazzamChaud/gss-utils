@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 
 import rdflib
 from behave import *
@@ -28,7 +29,7 @@ def step_impl(context, description):
 
 @step("generate TriG")
 def step_impl(context):
-    context.trig = context.scraper.generate_trig()
+    context.trig = context.scraper.generate_trig().decode("utf-8")
 
 
 def test_graph_diff(g1, g2):
@@ -66,9 +67,14 @@ def step_impl(context, trig_file):
     )
 
 
-def _get_single_graph_from_trig(trig_file: str) -> rdflib.Graph:
+def _get_single_graph_from_trig(
+    trig_file: Optional[str] = None, data: Optional[str] = None
+) -> rdflib.Graph:
+    if trig_file is None and data is None:
+        raise RuntimeError("One of trig_file OR data *must* be specified.")
+
     dataset = Dataset()
-    dataset.parse(format="trig", source=trig_file)
+    dataset.parse(format="trig", source=trig_file, data=data)
     graphs_with_triples = [g for g in dataset.graphs() if len(g) > 0]
     assert (
         len(graphs_with_triples) == 1
@@ -160,6 +166,6 @@ def step_impl(context, date):
 def step_impl(context, turtle_file):
     with open(Path("features") / "fixtures" / turtle_file) as f:
         test_graph_diff(
-            Graph().parse(format="trig", data=context.trig),
+            _get_single_graph_from_trig(data=context.trig),
             Graph().parse(format="turtle", file=f),
         )
