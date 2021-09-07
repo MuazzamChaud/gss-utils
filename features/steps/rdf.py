@@ -1,9 +1,11 @@
 from pathlib import Path
+from typing import Optional
 
+import rdflib
 from behave import *
 from nose.tools import *
 from rdflib.compare import to_isomorphic, graph_diff
-from rdflib import Graph
+from rdflib import Graph, Dataset
 from dateutil.parser import parse
 from datetime import datetime, timezone
 from gssutils.metadata import THEME
@@ -27,36 +29,57 @@ def step_impl(context, description):
 
 @step("generate TriG")
 def step_impl(context):
-    context.trig = context.scraper.generate_trig()
+    context.trig = context.scraper.generate_trig().decode("utf-8")
 
 
 def test_graph_diff(g1, g2):
-    in_both, only_in_first, only_in_second = graph_diff(to_isomorphic(g1), to_isomorphic(g2))
+    in_both, only_in_first, only_in_second = graph_diff(
+        to_isomorphic(g1), to_isomorphic(g2)
+    )
     only_in_first.namespace_manager = g1.namespace_manager
     only_in_second.namespace_manager = g2.namespace_manager
-    ok_(len(only_in_second) == 0, f"""
+
+    ok_(
+        len(only_in_second) == 0,
+        f"""
 <<<
-{only_in_first.serialize(format='n3').decode('utf-8')}
+{only_in_first.serialize(format="n3", encoding="utf-8")}
 ===
-{only_in_second.serialize(format='n3').decode('utf-8')}
+{only_in_second.serialize(format="n3", encoding="utf-8")}
 >>>
-""")
+""",
+    )
 
 
 @then("the TriG should contain")
 def step_impl(context):
     test_graph_diff(
-        Graph().parse(format='trig', data=context.trig),
-        Graph().parse(format='trig', data=context.text)
+        Graph().parse(format="trig", data=context.trig),
+        Graph().parse(format="trig", data=context.text),
     )
 
 
 @then('the TriG at "{trig_file}" should contain')
 def step_impl(context, trig_file):
     test_graph_diff(
-        Graph().parse(format='trig', source=trig_file),
-        Graph().parse(format='trig', data=context.text)
+        _get_single_graph_from_trig(trig_file),
+        Graph().parse(format="trig", data=context.text),
     )
+
+
+def _get_single_graph_from_trig(
+    trig_file: Optional[str] = None, data: Optional[str] = None
+) -> rdflib.Graph:
+    if trig_file is None and data is None:
+        raise RuntimeError("One of trig_file OR data *must* be specified.")
+
+    dataset = Dataset()
+    dataset.parse(format="trig", source=trig_file, data=data)
+    graphs_with_triples = [g for g in dataset.graphs() if len(g) > 0]
+    assert (
+        len(graphs_with_triples) == 1
+    ), f"Found {len(graphs_with_triples)} non-trivial graphs in {trig_file}. Expected one."
+    return graphs_with_triples[0]
 
 
 @then('the file at "{file}" should not exist')
@@ -72,21 +95,21 @@ def step_impl(context, file):
 @step("the RDF should contain")
 def step_impl(context):
     test_graph_diff(
-        Graph().parse(format='turtle', data=context.turtle),
-        Graph().parse(format='turtle', data=context.text)
+        Graph().parse(format="turtle", data=context.turtle),
+        Graph().parse(format="turtle", data=context.text),
     )
 
 
 @step("the ask query '{query_file}' should return {expected_query_result}")
 def step_impl(context, query_file: str, expected_query_result: str):
-    query_file = Path('features') / 'fixtures' / query_file
+    query_file = Path("features") / "fixtures" / query_file
     with open(query_file) as f:
         query = f.read()
-    g = Graph().parse(format='turtle', data=context.turtle)
+    g = Graph().parse(format="turtle", data=context.turtle)
     results = list(g.query(query))
     ask_result = results[0]
     expected_ask_result = bool(distutils.util.strtobool(expected_query_result))
-    assert(ask_result == expected_ask_result)
+    assert ask_result == expected_ask_result
 
 
 @step("set the family to '{family}'")
@@ -108,7 +131,7 @@ def step_impl(context, datetime):
 @step("set the license to '{license}'")
 def step_impl(context, license):
     license_url = {
-        'OGLv3': 'http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/'
+        "OGLv3": "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
     }.get(license)
     context.scraper.dataset.license = license_url
 
@@ -141,8 +164,8 @@ def step_impl(context, date):
 
 @then('the TriG should contain triples given by "{turtle_file}"')
 def step_impl(context, turtle_file):
-    with open(Path('features') / 'fixtures' / turtle_file) as f:
+    with open(Path("features") / "fixtures" / turtle_file) as f:
         test_graph_diff(
-            Graph().parse(format='trig', data=context.trig),
-            Graph().parse(format='turtle', file=f)
+            _get_single_graph_from_trig(data=context.trig),
+            Graph().parse(format="turtle", file=f),
         )
