@@ -457,7 +457,7 @@ class Scraper:
         return quads
 
     def generate_trig(self, catalog_id=None) -> bytes:
-        return self.as_quads(catalog_id).serialize(format="trig", encoding="uts-8")
+        return self.as_quads(catalog_id).serialize(format="trig", encoding="utf-8")
 
     @property
     def title(self):

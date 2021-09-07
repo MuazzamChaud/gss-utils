@@ -1,9 +1,10 @@
 from pathlib import Path
 
+import rdflib
 from behave import *
 from nose.tools import *
 from rdflib.compare import to_isomorphic, graph_diff
-from rdflib import Graph
+from rdflib import Graph, Dataset
 from dateutil.parser import parse
 from datetime import datetime, timezone
 from gssutils.metadata import THEME
@@ -36,26 +37,14 @@ def test_graph_diff(g1, g2):
     )
     only_in_first.namespace_manager = g1.namespace_manager
     only_in_second.namespace_manager = g2.namespace_manager
-    only_in_first_n3 = only_in_first.serialize(format="n3")
-    only_in_first_n3 = (
-        only_in_first_n3
-        if isinstance(only_in_first_n3, str)
-        else only_in_first_n3.decode("utf-8")
-    )
-    only_in_second_n3 = only_in_second.serialize(format="n3")
-    only_in_second_n3 = (
-        only_in_second_n3
-        if isinstance(only_in_second_n3, str)
-        else only_in_second_n3.decode("utf-8")
-    )
 
     ok_(
         len(only_in_second) == 0,
         f"""
 <<<
-{only_in_first_n3}
+{only_in_first.serialize(format="n3", encoding="utf-8")}
 ===
-{only_in_second_n3}
+{only_in_second.serialize(format="n3", encoding="utf-8")}
 >>>
 """,
     )
@@ -72,9 +61,19 @@ def step_impl(context):
 @then('the TriG at "{trig_file}" should contain')
 def step_impl(context, trig_file):
     test_graph_diff(
-        Graph().parse(format="trig", source=trig_file),
+        _get_single_graph_from_trig(trig_file),
         Graph().parse(format="trig", data=context.text),
     )
+
+
+def _get_single_graph_from_trig(trig_file: str) -> rdflib.Graph:
+    dataset = Dataset()
+    dataset.parse(format="trig", source=trig_file)
+    graphs_with_triples = [g for g in dataset.graphs() if len(g) > 0]
+    assert (
+        len(graphs_with_triples) == 1
+    ), f"Found {len(graphs_with_triples)} non-trivial graphs in {trig_file}. Expected one."
+    return graphs_with_triples[0]
 
 
 @then('the file at "{file}" should not exist')
