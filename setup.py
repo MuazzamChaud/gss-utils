@@ -25,7 +25,7 @@ setuptools.setup(
         "pandas",
         "html2text",
         "rdflib",
-        "rdflib-jsonld",
+        "rdflib-jsonld==0.6.1",
         "lxml",
         "unidecode",
         "argparse",

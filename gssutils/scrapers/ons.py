@@ -72,7 +72,7 @@ def scrape(scraper, tree):
     # and kill the scrape dead.
     try:
         # TODO - a list of things that aren't a date won't scale. Put a real catch in if we get any more.
-        if landing_page["description"]["nextRelease"] not in ["To be announced", "Discontinued", ""]:
+        if landing_page["description"]["nextRelease"].strip().lower() not in ["to be announced", "discontinued", ""]:
             scraper.dataset.updateDueOn = parse(landing_page["description"]["nextRelease"], dayfirst=True)
     except KeyError:
         # if there's no such key in the dict, python will throw a key error. Catch and control it.

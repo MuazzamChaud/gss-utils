@@ -11,7 +11,7 @@ docker = "*"
 pipenv-setup = "*"
 
 [packages]
-gssutils = {editable = true,path = "."}
+gssutils = {editable = true, path = "."}
 requests = {extras = ["security"],version = "*"}
 certifi = "*"
 uritemplate = "*"
