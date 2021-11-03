@@ -1,10 +1,13 @@
 import logging
+import json
+import os
 
 from csv import DictReader
 from io import StringIO
 
 from dateutil import tz
 from dateutil.parser import parse, isoparse
+from retrying import retry
 from urllib.parse import urlparse, urlunparse
 
 from gssutils.metadata.dcat import Distribution
@@ -18,6 +21,32 @@ ONS_DOWNLOAD_PREFIX = ONS_PREFIX + "/file?uri="
 ONS_TOPICS_CSV = 'https://gss-cogs.github.io/ref_common/reference/codelists/ons-topics.csv'
 
 
+def get_dict_from_json_url(url, scraper):
+    """ Wrapper to Let the DE decide if they want retries or not via an env var"""
+    if bool(os.getenv("ONS_SCRAPER_RETRIES", None)):
+        return retry_get(url, scraper)
+    return get(url, scraper)
+
+
+def get(url, scraper):
+    """ Given a url, return a dict"""
+    r = scraper.session.get(url)
+    if not r.ok:
+        raise ValueError(f"Aborting. Issue encountered while attempting to scrape '{url}'. Http code"
+                        f" returned was '{r.status_code}.")
+    return r.json()
+
+
+@retry(wait_exponential_multiplier=1000, wait_exponential_max=10000, stop_max_delay=30000)
+def retry_get(url, scraper):
+    """ Given a url, return a dict, with retries for errors"""
+    try:
+        return get(url, scraper)
+    except Exception as err:
+        print(f'Retrying failed attempt to get dict from json. Error was: {err}')
+        raise err
+
+    
 def scrape(scraper, tree):
     """
     This is json scraper for ons.gov.uk pages
@@ -28,34 +57,16 @@ def scrape(scraper, tree):
     :return:
     """
 
-    # So we start from an ons url and append /data to it, to get json as per the following:
-    # https://www.ons.gov.uk/businessindustryandtrade/internationaltrade/datasets/uktradeingoodsbyclassificationofproductbyactivity/data
-    # any issues getting it, or if we can't load the response into json - throw an error
-    r = scraper.session.get(scraper.uri + "/data")
-    if r.status_code != 200:
-        raise ValueError("Aborting. Issue encountered while attempting to scrape '{}'. Http code"
-                         " returned was '{}.".format(scraper.uri + "/data", r.status_code))
-    try:
-        landing_page = r.json()
-    except Exception as e:
-        raise ValueError("Aborting operation This is not json-able content.") from e
+    landing_page = get_dict_from_json_url(scraper.uri + "/data", scraper)
 
     accepted_page_types = ["dataset_landing_page", "static_adhoc"]
     if landing_page["type"] not in accepted_page_types:
         raise ValueError("Aborting operation This page type is not supported.")
 
-    # Acquire title and description from the page json
-    # literally just whatever's in {"description": {"title": <THIS> }}
     scraper.dataset.title = landing_page["description"]["title"].strip()
 
-    # Same with date, but use parse_as_local_date() which converts to the right time type
     scraper.dataset.issued = parse_as_local_date(landing_page["description"]["releaseDate"])
 
-    # each json page has a type, represented by the 'type' field in the json
-    # the most common one for datasets is dataset_landing_page
-    # if that's the page type we're looking at then the comment is in {"description": {"summary": <THIS> }}
-    # otherwise, look in the markdown field (adhoc notes about a page)
-    # for page types other than dataset_landing_page, the markdown field can be quite long, so we truncate
     # TODO, depends on outcome of https://github.com/GSS-Cogs/gss-utils/issues/308
     page_type = landing_page["type"]
     if page_type == "dataset_landing_page":
@@ -65,39 +76,25 @@ def scrape(scraper, tree):
         scraper.dataset.comment = landing_page["markdown"][0].split("\n")[0].strip()
         scraper.dataset.description = landing_page["markdown"][0]
 
-    # not all page types have a next Release date field, also - "to be announced" is useless as is a blank entry.
-    # so if its present, not blank, and doesnt say "to be announced" get it as
-    # {"description": {"nextRelease": <THIS> }} and parse() to time type
-    # note: the reasons we're being this careful is the timer parser will throw an error for bad input
-    # and kill the scrape dead.
     try:
         # TODO - a list of things that aren't a date won't scale. Put a real catch in if we get any more.
         if landing_page["description"]["nextRelease"].strip().lower() not in ["to be announced", "discontinued", ""]:
             scraper.dataset.updateDueOn = parse(landing_page["description"]["nextRelease"], dayfirst=True)
     except KeyError:
-        # if there's no such key in the dict, python will throw a key error. Catch and control it.
-        # if we're skipping a field, we might want to know
         logging.debug("no description.nextRelease key in json, skipping")
 
-    # not all page types have contact field so we need another catch
-    # if the page does, get the email address as contact info.
-    # stick "mailto:" on the start because metadata expects it.
     try:
         contact_dict = landing_page["description"]["contact"]
         scraper.dataset.contactPoint = "mailto:" + contact_dict["email"].strip()
     except KeyError:
-        # if we're skipping a field, we might want to know
         logging.debug("no description.contact key in json, skipping")
 
     scraper.dataset.keyword = list(
         set([x.strip() for x in landing_page["description"]["keywords"]]))
 
-    # boiler plate
     scraper.dataset.publisher = 'https://www.gov.uk/government/organisations/office-for-national-statistics'
     scraper.dataset.license = "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
 
-    # theme isn't provided explicitly in the JSON, so we need to use the URL path
-    # and match it against the taxonomy codelist from GitHub
     topics_response = scraper.session.get(
         ONS_TOPICS_CSV,
         stream=True
@@ -174,15 +171,7 @@ def handler_dataset_landing_page(scraper, landing_page, tree):
     # https://www.ons.gov.uk//businessindustryandtrade/internationaltrade/datasets/uktradeingoodsbyclassificationofproductbyactivity/current/data
     for dataset_page_url in landing_page["datasets"]:
 
-        # Get the page as json. Throw an information error if we fail for whatever reason
-        dataset_page_json_url = ONS_PREFIX + dataset_page_url["uri"] + "/data"
-        r = scraper.session.get(dataset_page_json_url)
-        if r.status_code != 200:
-            raise ValueError("Scrape of url '{}' failed with status code {}." \
-                             .format(dataset_page_json_url, r.status_code))
-
-        # get the response json into a python dict
-        this_dataset_page = r.json()
+        this_dataset_page = get_dict_from_json_url(ONS_PREFIX + dataset_page_url["uri"] + "/data", scraper)
 
         # create a list, with each entry a dict of a versions url and update date
         versions_dict_list = []
@@ -237,25 +226,15 @@ def handler_dataset_landing_page(scraper, landing_page, tree):
         # iterate through the lot, we're aiming to create at least one distribution object for each
         for i, version_dict in enumerate(versions_dict_list):
 
+            version_dict = versions_dict_list[i]
+
             version_url = version_dict["url"]
             issued = version_dict["issued"]
 
             logging.debug("Identified distribution url, building distribution object for: " + version_url)
 
-            r = scraper.session.get(version_url)
-            if r.status_code != 200:
-
-                # If we've got a 404 on the latest, fallback on using the details from the
-                # landing page instead
-                if r.status_code == 404 and i == len(versions_dict_list) - 1:
-                    handler_dataset_landing_page_fallback(scraper, this_dataset_page, tree)
-                    continue
-                else:
-                    raise Exception("Scraper unable to acquire the page: {} with http code {}."
-                                    .format(version_url, r.status_code))
-
             # get the response json into a python dict
-            this_page = r.json()
+            this_page = get_dict_from_json_url(version_url, scraper)
 
             # Get the download urls, if there's more than 1 format of this version of the dataset
             # each forms a separate distribution
