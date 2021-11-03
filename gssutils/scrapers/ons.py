@@ -7,7 +7,6 @@ from io import StringIO
 import backoff
 from dateutil import tz
 from dateutil.parser import parse, isoparse
-from retrying import retry
 from urllib.parse import urlparse, urlunparse
 
 from gssutils.metadata.dcat import Distribution
