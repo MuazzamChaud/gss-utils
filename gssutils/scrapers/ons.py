@@ -1,10 +1,10 @@
 import logging
-import json
 import os
 
 from csv import DictReader
 from io import StringIO
 
+import backoff
 from dateutil import tz
 from dateutil.parser import parse, isoparse
 from retrying import retry
@@ -37,7 +37,7 @@ def get(url, scraper):
     return r.json()
 
 
-@retry(wait_exponential_multiplier=1000, wait_exponential_max=10000, stop_max_delay=30000)
+@backoff.on_exception(backoff.expo, Exception, max_time=30)
 def retry_get(url, scraper):
     """ Given a url, return a dict, with retries for errors"""
     try:

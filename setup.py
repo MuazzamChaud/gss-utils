@@ -33,7 +33,7 @@ setuptools.setup(
         "uritemplate",
         "backoff",
         "vcrpy",
-        "pyRdfa3",
+        "pyRdfa3"
     ],
     tests_require=["behave", "parse", "nose", "vcrpy", "docker"],
     classifiers=[
