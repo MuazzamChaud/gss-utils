@@ -225,8 +225,6 @@ def handler_dataset_landing_page(scraper, landing_page, tree):
         # iterate through the lot, we're aiming to create at least one distribution object for each
         for i, version_dict in enumerate(versions_dict_list):
 
-            version_dict = versions_dict_list[i]
-
             version_url = version_dict["url"]
             issued = version_dict["issued"]
 
