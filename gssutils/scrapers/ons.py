@@ -1,3 +1,4 @@
+from distutils.util import strtobool
 import logging
 import os
 
@@ -7,7 +8,9 @@ from io import StringIO
 import backoff
 from dateutil import tz
 from dateutil.parser import parse, isoparse
+
 from urllib.parse import urlparse, urlunparse
+
 
 from gssutils.metadata.dcat import Distribution
 from gssutils.metadata.mimetype import Excel, ODS, CSV, ExcelOpenXML, CSDB
@@ -22,7 +25,7 @@ ONS_TOPICS_CSV = 'https://gss-cogs.github.io/ref_common/reference/codelists/ons-
 
 def get_dict_from_json_url(url, scraper):
     """ Wrapper to Let the DE decide if they want retries or not via an env var"""
-    if bool(os.getenv("ONS_SCRAPER_RETRIES", None)):
+    if strtobool(os.getenv("ONS_SCRAPER_RETRIES", "False")):
         return retry_get(url, scraper)
     return get(url, scraper)
 
