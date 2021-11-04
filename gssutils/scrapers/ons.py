@@ -1,21 +1,18 @@
-from distutils.util import strtobool
-import logging
-import os
-
 from csv import DictReader
 from io import StringIO
+import logging
+import mimetypes
+import os
+from urllib.parse import urlparse, urlunparse
 
 import backoff
 from dateutil import tz
 from dateutil.parser import parse, isoparse
-
-from urllib.parse import urlparse, urlunparse
-
+from distutils.util import strtobool
 
 from gssutils.metadata.dcat import Distribution
 from gssutils.metadata.mimetype import Excel, ODS, CSV, ExcelOpenXML, CSDB
 
-import mimetypes
 
 # save ourselves some typing later
 ONS_PREFIX = "https://www.ons.gov.uk"
