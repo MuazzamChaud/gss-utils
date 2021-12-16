@@ -19,7 +19,7 @@ setuptools.setup(
         "python_dateutil",
         "CacheControl==0.12.6",
         "lockfile",
-        "databaker @ git+git://github.com/GSS-Cogs/databaker.git@ea361317309bb874881f3a4f850ff6b844bfbf43#egg=databaker",
+        "databaker @ git+git://github.com/GSS-Cogs/databaker.git@df0877dd4cd80730f4060b5764475a88c907d257#egg=databaker",
         "ipython",
         "jinja2",
         "pandas",
