@@ -17,7 +17,7 @@ setuptools.setup(
     install_requires=[
         "requests",
         "python_dateutil",
-        "CacheControl==0.12.6",
+        "CacheControl==0.12.6", # Pinned as later versions causing failure of current (16/12/2021) api scraper tests
         "lockfile",
         "databaker @ git+git://github.com/GSS-Cogs/databaker.git@2dc3f373910a657aa506ba96ba0f2f0bdf488522#egg=databaker",
         "ipython",
