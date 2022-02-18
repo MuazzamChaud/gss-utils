@@ -3,7 +3,6 @@ import logging
 import os
 from datetime import datetime, timezone
 from urllib.parse import urljoin, urlparse
-
 import html2text
 import msgpack
 import requests
@@ -14,6 +13,7 @@ from dateutil.parser import parse
 from lxml import html
 from rdflib import BNode, URIRef
 from rdflib.graph import Dataset as RDFDataset
+from csvcubed.models.cube.qb.catalog import CatalogMetadata
 
 import gssutils.scrapers
 from gssutils.metadata import namespaces, dcat, pmdcat, mimetype, GOV, GDP
@@ -421,6 +421,28 @@ class Scraper:
 
     def set_description(self, description):
         self.dataset.description = description
+
+    def as_csvqb_catalog_metadata(self) -> CatalogMetadata:
+        landing_page = getattr(self.dataset, "landingPage", [])
+        landing_pages = (
+            landing_page if isinstance(landing_page, list) else [landing_page]
+        )
+        return CatalogMetadata(
+            title=self.dataset.title,
+            summary=getattr(self.dataset, "comment", None),
+            description=getattr(self.dataset, "description", None),
+            creator_uri=getattr(self.dataset, "publisher", None),
+            publisher_uri=getattr(self.dataset, "publisher", None),
+            landing_page_uris=landing_pages,
+            theme_uris=[
+                str(t) for t in ensure_list(getattr(self.dataset, "theme", []))
+            ],
+            keywords=getattr(self.dataset, "keyword", []),
+            dataset_issued=getattr(self.dataset, "issued", None),
+            dataset_modified=getattr(self.dataset, "modified", None),
+            license_uri=getattr(self.dataset, "license", None),
+            public_contact_point_uri=getattr(self.dataset, "contactPoint", None),
+        )
 
     def as_quads(self, catalog_id=None):
         catalog = dcat.Catalog()

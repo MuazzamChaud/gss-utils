@@ -1,3 +1,4 @@
+import json
 import os
 import ast
 from collections import OrderedDict
@@ -6,25 +7,27 @@ from urllib.parse import urlparse
 import requests
 import vcr
 from behave import *
+from csvcubed.models.cube import CatalogMetadata
 from nose.tools import *
 
 from gssutils import Scraper
 from gssutils.metadata import DCTERMS, DCAT, RDFS, namespaces
 from gssutils.metadata.mimetype import Excel
 
-DEFAULT_RECORD_MODE = 'new_episodes'
+DEFAULT_RECORD_MODE = "new_episodes"
 
 
 def cassette(uri):
     host = urlparse(uri).hostname
-    return f'features/fixtures/cassettes/domains/{host}.yml'
+    return f"features/fixtures/cassettes/domains/{host}.yml"
 
 
 @given('I scrape the page "{uri}"')
 def step_impl(context, uri):
-    with vcr.use_cassette(cassette(uri),
-                          record_mode=context.config.userdata.get('record_mode',
-                                                                  DEFAULT_RECORD_MODE)):
+    with vcr.use_cassette(
+        cassette(uri),
+        record_mode=context.config.userdata.get("record_mode", DEFAULT_RECORD_MODE),
+    ):
         context.scraper = Scraper(uri, requests.Session())
 
 
@@ -54,14 +57,14 @@ def step_impl(context, error_message):
 
 @then('the data can be downloaded from "{uri}"')
 def step_impl(context, uri):
-    if not hasattr(context, 'distribution'):
+    if not hasattr(context, "distribution"):
         context.distribution = context.scraper.distribution(latest=True)
     assert_equal(context.distribution.downloadURL, uri)
 
 
 @then('the data download URL should match "{uri}"')
 def step_impl(context, uri):
-    if not hasattr(context, 'distribution'):
+    if not hasattr(context, "distribution"):
         context.distribution = context.scraper.distribution(latest=True)
     assert_regexp_matches(context.distribution.downloadURL, uri)
 
@@ -111,41 +114,45 @@ def step_impl(context, keywords):
 
 @step('there should be "{num_of_distributions}" distributions')
 def step_impl(context, num_of_distributions):
-    assert len(context.scraper.distributions) == int(num_of_distributions), \
-        f'expected {len(context.scraper.distributions)} distributions, but got {num_of_distributions}'
+    assert len(context.scraper.distributions) == int(
+        num_of_distributions
+    ), f"expected {len(context.scraper.distributions)} distributions, but got {num_of_distributions}"
 
 
 @then("{prefix}:{property} should be `{object}`")
 def step_impl(context, prefix, property, object):
-    ns = {'dct': DCTERMS, 'dcat': DCAT, 'rdfs': RDFS}.get(prefix)
+    ns = {"dct": DCTERMS, "dcat": DCAT, "rdfs": RDFS}.get(prefix)
     properties = context.scraper.dataset.get_property(ns[property])
     if isinstance(properties, list):
         properties = set(list(map(lambda t: t.n3(namespaces), properties)))
         object = set(ast.literal_eval(object))
-    else :
+    else:
         properties = properties.n3(namespaces)
     assert_equal(properties, object)
 
 
 @then("{prefix}:{property} should match `{object}`")
 def step_impl(context, prefix, property, object):
-    ns = {'dct': DCTERMS, 'dcat': DCAT, 'rdfs': RDFS}.get(prefix)
-    assert_regexp_matches(context.scraper.dataset.get_property(ns[property]).n3(namespaces), object)
+    ns = {"dct": DCTERMS, "dcat": DCAT, "rdfs": RDFS}.get(prefix)
+    assert_regexp_matches(
+        context.scraper.dataset.get_property(ns[property]).n3(namespaces), object
+    )
 
 
 @step("fetch the distribution as a databaker object")
 def step_impl(context):
-    with vcr.use_cassette(cassette(context.scraper.uri),
-                          record_mode=context.config.userdata.get('record_mode',
-                                                                  DEFAULT_RECORD_MODE)):
-        if not hasattr(context, 'distribution'):
+    with vcr.use_cassette(
+        cassette(context.scraper.uri),
+        record_mode=context.config.userdata.get("record_mode", DEFAULT_RECORD_MODE),
+    ):
+        if not hasattr(context, "distribution"):
             context.distribution = context.scraper.distribution(latest=True)
         context.databaker = context.distribution.as_databaker(latest=True)
 
 
 @then("the sheet names contain [{namelist}]")
 def step_impl(context, namelist):
-    names = [name.strip() for name in namelist.split(',')]
+    names = [name.strip() for name in namelist.split(",")]
     tabnames = [tab.name for tab in context.databaker]
     ok_(set(names).issubset(set(tabnames)))
 
@@ -163,7 +170,7 @@ def step_impl(context, env, value):
 
 @step("select the distribution given by")
 def step_impl(context):
-    args = {"latest":True}
+    args = {"latest": True}
     for row in context.table:
         args[row[0]] = row[1]
     context.distribution = context.scraper.distribution(**args)
@@ -171,16 +178,19 @@ def step_impl(context):
 
 @step("fetch the '{tabname}' tab as a pandas DataFrame")
 def step_impl(context, tabname):
-    with vcr.use_cassette(cassette(context.scraper.uri),
-                          record_mode=context.config.userdata.get('record_mode',
-                                                                  DEFAULT_RECORD_MODE)):
+    with vcr.use_cassette(
+        cassette(context.scraper.uri),
+        record_mode=context.config.userdata.get("record_mode", DEFAULT_RECORD_MODE),
+    ):
         context.pandas = context.distribution.as_pandas(sheet_name=tabname)
 
 
 @step('select the oldest "{media_type}" distribution')
 def step_impl(context, media_type):
     oldest = min([x.issued for x in context.scraper.distributions])
-    context.distribution = context.scraper.distribution(issued=oldest, mediaType=media_type)
+    context.distribution = context.scraper.distribution(
+        issued=oldest, mediaType=media_type
+    )
     assert_is_not_none(context.distribution)
 
 
@@ -192,15 +202,18 @@ def step_impl(context, rows):
 
 @step('select the distribution whose title starts with "{title_start}"')
 def step_impl(context, title_start):
-    context.distribution = context.scraper.distribution(latest=True, title=lambda x: x.startswith(title_start))
+    context.distribution = context.scraper.distribution(
+        latest=True, title=lambda x: x.startswith(title_start)
+    )
     assert_is_not_none(context.distribution)
 
 
 @then("fetch the tabs as a dict of pandas DataFrames")
 def step_impl(context):
-    with vcr.use_cassette(cassette(context.scraper.uri),
-                          record_mode=context.config.userdata.get('record_mode',
-                                                                  DEFAULT_RECORD_MODE)):
+    with vcr.use_cassette(
+        cassette(context.scraper.uri),
+        record_mode=context.config.userdata.get("record_mode", DEFAULT_RECORD_MODE),
+    ):
         context.pandas = context.distribution.as_pandas()
         assert type(context.pandas) in [OrderedDict, dict]
 
@@ -214,7 +227,7 @@ def step_impl(context):
 @step("the catalog has more than one dataset")
 def step_impl(context):
     eq_(type(context.scraper.catalog.dataset), list)
-    assert(len(context.scraper.catalog.dataset) > 1)
+    assert len(context.scraper.catalog.dataset) > 1
 
 
 @step('I select the dataset "{title}"')
@@ -234,18 +247,22 @@ def step_impl(context, title):
 
 @step("fetch the distribution as a pandas dataframe")
 def step_impl(context):
-    with vcr.use_cassette(cassette(context.scraper.uri),
-                          record_mode=context.config.userdata.get('record_mode',
-                                                                  DEFAULT_RECORD_MODE)):
+    with vcr.use_cassette(
+        cassette(context.scraper.uri),
+        record_mode=context.config.userdata.get("record_mode", DEFAULT_RECORD_MODE),
+    ):
         context.pandas = context.pandas = context.distribution.as_pandas()
 
 
 @step('fetch the distribution as a pandas dataframe with encoding "{encoding}"')
 def step_impl(context, encoding):
-    with vcr.use_cassette(cassette(context.scraper.uri),
-                          record_mode=context.config.userdata.get('record_mode',
-                                                                  DEFAULT_RECORD_MODE)):
-        context.pandas = context.pandas = context.distribution.as_pandas(encoding=encoding)
+    with vcr.use_cassette(
+        cassette(context.scraper.uri),
+        record_mode=context.config.userdata.get("record_mode", DEFAULT_RECORD_MODE),
+    ):
+        context.pandas = context.pandas = context.distribution.as_pandas(
+            encoding=encoding
+        )
 
 
 @then('the dataset landing page should be "{url}"')
@@ -255,4 +272,28 @@ def step_impl(context, url):
 
 @step("the markdown representation should start with")
 def step_impl(context):
-    eq_(context.scraper._repr_markdown_()[:len(context.text)], context.text)
+    eq_(context.scraper._repr_markdown_()[: len(context.text)], context.text)
+
+
+@then("the CSVqb catalog metadata JSON should contain")
+def step_impl(context):
+    expected_json = context.text
+    expected_metadata_dict = json.loads(expected_json)
+    actual_metadata: CatalogMetadata = context.scraper.as_csvqb_catalog_metadata()
+
+    # Standardise the order of lists for predictability.
+    actual_metadata.theme_uris = sorted(actual_metadata.theme_uris)
+    actual_metadata.keywords = sorted(actual_metadata.keywords)
+
+    actual_metadata_dict = actual_metadata.as_json_dict()
+    filtered_actual_metadata = dict(
+        [
+            (k, v)
+            for (k, v) in actual_metadata_dict.items()
+            if k in expected_metadata_dict
+        ]
+    )
+
+    assert filtered_actual_metadata == expected_metadata_dict, json.dumps(
+        filtered_actual_metadata, indent=4
+    )

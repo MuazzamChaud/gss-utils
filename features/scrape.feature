@@ -333,3 +333,29 @@ Feature: Scrape dataset info
     And select the distribution whose title starts with "COVID-19"
     Then the data can be downloaded from "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/937658/OFF-SEN-Disaster-Relief-List-20201116_vaccine.csv"
     And dct:publisher should be `gov:hm-revenue-customs`
+
+
+  Scenario: When generating CSVqb Catalog Metadata JSON, all fields should be correctly mapped.
+    Given I scrape the page "https://www.ons.gov.uk/businessindustryandtrade/business/businessinnovation/datasets/foreigndirectinvestmentinvolvingukcompanies2013inwardtables"
+    Then the CSVqb catalog metadata JSON should contain
+    """
+      {
+        "title": "Foreign direct investment involving UK companies: inward",
+        "summary": "Annual statistics on the investment of foreign companies into the UK, including for investment flows, positions and earnings.",
+        "description": "Inward reference table including data for flows, positions and earnings.",
+        "creator_uri": "https://www.gov.uk/government/organisations/office-for-national-statistics",
+        "publisher_uri": "https://www.gov.uk/government/organisations/office-for-national-statistics",
+        "landing_page_uris": ["https://www.ons.gov.uk/businessindustryandtrade/business/businessinnovation/datasets/foreigndirectinvestmentinvolvingukcompanies2013inwardtables"],
+        "theme_uris": [
+            "https://www.ons.gov.uk/businessindustryandtrade/business/businessinnovation"
+        ],
+        "keywords": [
+            "business investment",
+            "investment flows",
+            "stocks"
+        ],
+        "dataset_issued": "2019-12-03",
+        "license_uri": "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+        "public_contact_point_uri": "mailto:fdi@ons.gov.uk"
+    }
+    """

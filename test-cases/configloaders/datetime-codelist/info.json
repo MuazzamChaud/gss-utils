@@ -1,0 +1,39 @@
+{
+    "$schema": "http://gss-cogs.github.io/family-schemas/dataset-schema.json",
+    "id": "single-measure-bulletin",
+    "title": "single-measure-bottles-bulletin",
+    "publisher": "HM Revenue & Customs",
+    "description": "All bulletins provide details on percentage of one litre or less bottles. This information is provided on a yearly basis.",
+    "landingPage": "https://www.gov.uk/government/statistics/bottles-bulletin",
+    "datasetNotes": [
+        "\"UK bottles-bulletin Tables\" Excel file, latest version on page"
+    ],
+    "published": "2019-02-28",
+    "families": [
+        "Trade"
+    ],
+    "extract": {
+        "source": "XLS",
+        "stage": "Done"
+    },
+    "transform": {
+        "airtable": "recys4OhEtE0gE14P",
+        "columns": {
+            "Period": {
+                "parent": "http://purl.org/linked-data/sdmx/2009/dimension#refPeriod",
+                "value": "http://reference.data.gov.uk/id/year/{+period}"
+            },
+            "Marker": {
+                "attribute": "http://purl.org/linked-data/sdmx/2009/attribute#obsStatus",
+                "value": "http://gss-data.org.uk/def/concept/marker/{marker}"
+            },
+            "Value": {
+                "unit": "http://gss-data.org.uk/def/concept/measurement-units/percentage",
+                "measure": "http://gss-data.org.uk/def/climate-change/measure/monthly-maximum-temperature"
+            }
+        },
+        "main_issue": 67
+    },
+    "sizingNotes": "",
+    "notes": ""
+}

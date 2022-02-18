@@ -82,6 +82,8 @@ class Cubes:
         Output every cube object we've added to the cubes() class.
         """
 
+        logging.warning("Using Cubes.output_all() as the method of serialising to CSV-W is depreciated, see the documentation on how to migrate to info.json v1.1 and csvcubed at gssutils/csvcubedintegration/configloaders/README.md")
+
         if len(self.cubes) == 0:
             raise Exception(
                 "Please add at least one datacube with '.add_cube' before "

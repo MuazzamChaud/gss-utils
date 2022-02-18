@@ -9,6 +9,9 @@ nose = "*"
 vcrpy = "*"
 docker = "*"
 pipenv-setup = "*"
+pytest = "*"
+csvcubed-devtools = "*"
+csvw = "*"
 
 [packages]
 gssutils = {editable = true, path = "."}
@@ -17,6 +20,10 @@ certifi = "*"
 uritemplate = "*"
 jinja2 = "*"
 backoff = "*"
+csvcubed-devtools = "*"
 
 [requires]
 python_version = "3.9"
+
+[pipenv]
+allow_prereleases = true

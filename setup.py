@@ -17,14 +17,14 @@ setuptools.setup(
     install_requires=[
         "requests",
         "python_dateutil",
-        "CacheControl==0.12.6", # Pinned as later versions causing failure of current (16/12/2021) api scraper tests
+        "CacheControl==0.12.6",  # Pinned as later versions causing failure of current (16/12/2021) api scraper tests
         "lockfile",
         "databaker @ git+git://github.com/GSS-Cogs/databaker.git@2dc3f373910a657aa506ba96ba0f2f0bdf488522#egg=databaker",
         "ipython",
         "jinja2",
         "pandas",
         "html2text",
-        "rdflib",
+        "rdflib>=6.0.0",
         "rdflib-jsonld==0.6.1",
         "lxml",
         "unidecode",
@@ -33,7 +33,17 @@ setuptools.setup(
         "uritemplate",
         "backoff",
         "vcrpy",
-        "pyRdfa3"
+        "pyRdfa3",
+        "csvcubed-models==0.1.0rc4",
+        "csvcubed==0.1.0rc4",
+        "csvcubed-pydantic>=1.9.0",
+        "click~=8.0.1",
+        "colorama~=0.4.4",
+        "jsonschema~=3.2.0",
+        "pyparsing==2.4.7",
+        # xypath doesn't pin the version of pyhamcrest currently used
+        # version 2.0.3 breaks functionality we're using.
+        "pyhamcrest<=2.0.2",
     ],
     tests_require=["behave", "parse", "nose", "vcrpy", "docker"],
     classifiers=[
@@ -43,7 +53,8 @@ setuptools.setup(
     ],
     entry_points={
         "console_scripts": [
-            "codelist-manager=gssutils.codelistmanager.main:codelist_manager"
+            "codelist-manager=gssutils.codelistmanager.main:codelist_manager",
+            "infojson2csvqb=gssutils.csvcubedintegration.infojson2csvqb.entrypoint:entry_point",
         ]
     },
 )
