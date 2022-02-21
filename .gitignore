@@ -9,3 +9,5 @@ out
 codelists
 **/.DS_Store
 .vscode
+**/build
+*.egg
