@@ -34,12 +34,12 @@ setuptools.setup(
         "backoff",
         "vcrpy",
         "pyRdfa3",
-        "csvcubed-models==0.1.0rc4",
-        "csvcubed==0.1.0rc4",
+        "csvcubed-models==0.1.0rc5",
+        "csvcubed==0.1.0rc5",
         "csvcubed-pydantic>=1.9.0",
         "click~=8.0.1",
         "colorama~=0.4.4",
-        "jsonschema~=3.2.0",
+        "jsonschema~=4.4.0",
         "pyparsing==2.4.7",
         # xypath doesn't pin the version of pyhamcrest currently used
         # version 2.0.3 breaks functionality we're using.
