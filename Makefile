@@ -1,4 +1,4 @@
-Pipfile.lock: Pipfile
+Pipfile.lock: Pipfile setup.py
 	$(eval CID := $(shell docker run -dit --rm python:3.9))
 	docker exec $(CID) mkdir /app
 	docker cp Pipfile $(CID):app/Pipfile

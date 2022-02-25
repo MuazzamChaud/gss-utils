@@ -32,7 +32,6 @@ setuptools.setup(
         "wheel",
         "uritemplate",
         "backoff",
-        "vcrpy",
         "pyRdfa3",
         "csvcubed-models==0.1.0rc5",
         "csvcubed==0.1.0rc5",
