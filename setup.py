@@ -43,6 +43,7 @@ setuptools.setup(
         # xypath doesn't pin the version of pyhamcrest currently used
         # version 2.0.3 breaks functionality we're using.
         "pyhamcrest<=2.0.2",
+        "vcrpy~=4.1.1",
     ],
     tests_require=["behave", "parse", "nose", "vcrpy", "docker"],
     classifiers=[
