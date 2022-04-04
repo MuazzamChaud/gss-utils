@@ -17,6 +17,7 @@ from csvcubed.models.cube import SpecificValidationError
 from csvcubed.models.cube.qb import QbCube
 from csvcubed.models.cube.qb.catalog import CatalogMetadata
 from csvcubedmodels.dataclassbase import DataClassBase
+from csvcubed.utils.pandas import read_csv
 
 from gssutils.csvcubedintegration.configloaders.infojson import get_cube_from_info_json
 
@@ -31,7 +32,7 @@ def build(
 ):
     print(f"{Style.DIM}CSV: {csv_path.absolute()}")
     print(f"{Style.DIM}info.json: {info_json.absolute()}")
-    data = pd.read_csv(csv_path)
+    data = read_csv(csv_path)
     assert isinstance(data, pd.DataFrame)
     cube, json_schema_validation_errors = get_cube_from_info_json(info_json, data)
 
