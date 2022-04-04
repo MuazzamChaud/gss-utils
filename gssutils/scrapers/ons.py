@@ -7,7 +7,7 @@ from urllib.parse import urlparse, urlunparse
 
 import backoff
 from dateutil import tz
-from dateutil.parser import parse, isoparse
+from dateutil.parser import parse, isoparse, ParserError
 from distutils.util import strtobool
 
 from gssutils.metadata.dcat import Distribution
@@ -76,9 +76,18 @@ def scrape(scraper, tree):
         scraper.dataset.description = landing_page["markdown"][0]
 
     try:
-        # TODO - a list of things that aren't a date won't scale. Put a real catch in if we get any more.
-        if landing_page["description"]["nextRelease"].strip().lower() not in ["to be announced", "discontinued", ""]:
+        # Account for people replacing an expected date field with free text, eg: "this is discontinued".
+        # Warn user (in case that's not the issue) but allow the scrape to continue.
+        # Note: I dislike how broad this is but the ONS is wildly inconsistent in the notice text they're using,
+        # so we're just gonna have to throw a wanring at the DE's and let them make an informed choice
+        # where this occurs.
+        try:
             scraper.dataset.updateDueOn = parse(landing_page["description"]["nextRelease"], dayfirst=True)
+        except ParserError as err:
+            logging.warning(
+                f'Unable to parse ["description"]["nextRelease"] nextRelease field from: {scraper.uri + "/data"}.'
+                f' with date ParseError of: "{err}". Continuing scrape without this data.')
+
     except KeyError:
         logging.debug("no description.nextRelease key in json, skipping")
 
