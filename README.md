@@ -7,12 +7,13 @@ Shared data transformation utilities for GSS data.
 #### Pre-requisites
 - Clone this repo
 - `pip install pipenv`
-
-#### Start virtual environment shell
-- `pipenv shell`
+- `pipenv --python 3.9`
 
 #### Install dependencies
 - `pipenv sync --dev`
+
+#### Start virtual environment shell
+- `pipenv shell`
  
 #### Test run
 - Run one of the utils which should now exist as a binary within the environment
