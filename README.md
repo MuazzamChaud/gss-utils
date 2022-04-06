@@ -2,6 +2,35 @@
 
 Shared data transformation utilities for GSS data.
 
+### Development - Getting started
+
+#### Pre-requisites
+- Clone this repo
+- `pip install pipenv`
+
+#### Start virtual environment shell
+- `pipenv shell`
+
+#### Install dependencies
+- `pipenv sync --dev`
+ 
+#### Test run
+- Run one of the utils which should now exist as a binary within the environment
+
+```
+gss-utils % infojson2csvqb 
+Usage: infojson2csvqb [OPTIONS] COMMAND [ARGS]...
+
+  infojson2csvqb - a tool to generate qb-flavoured CSV-W cubes from COGS-style
+  info.json files.
+
+Options:
+  -h, --help  Show this message and exit.
+
+Commands:
+  build  Build a qb-flavoured CSV-W from a tidy CSV
+```
+
 ### Known issues
 
 #### vcrpy does not overwrite interactions
