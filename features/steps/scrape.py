@@ -119,6 +119,11 @@ def step_impl(context, num_of_distributions):
     ), f"expected {len(context.scraper.distributions)} distributions, but got {num_of_distributions}"
 
 
+@step('there should be at least one distribution')
+def step_impl(context):
+    assert len(context.scraper.distributions) > 0
+
+
 @then("{prefix}:{property} should be `{object}`")
 def step_impl(context, prefix, property, object):
     ns = {"dct": DCTERMS, "dcat": DCAT, "rdfs": RDFS}.get(prefix)

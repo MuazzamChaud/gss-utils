@@ -136,7 +136,7 @@ def content_api_publication(scraper, metadata):
 def extract_distributions(distributions, link_tree, scraper):
     div_attach = next(iter(link_tree.xpath("div[@class='attachment-details']")), None)
     if div_attach is not None:
-        div_metadata = next(iter(div_attach.xpath("p[@class='metadata']")), None)
+        div_metadata = next(iter(div_attach.xpath("p[contains(concat(' ', @class, ' '), ' metadata ')]")), None)
         if div_metadata is not None:
             span_type = next(iter(div_metadata.xpath("span[@class='type']")), None)
             if span_type is not None:

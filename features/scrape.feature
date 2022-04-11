@@ -359,3 +359,7 @@ Feature: Scrape dataset info
         "public_contact_point_uri": "mailto:fdi@ons.gov.uk"
     }
     """
+
+  Scenario: gov.uk distributions missing
+    Given I scrape the page "https://www.gov.uk/government/statistical-data-sets/regional-trade-statistics-interactive-analysis-second-quarter-2020"
+    Then there should be at least one distribution
