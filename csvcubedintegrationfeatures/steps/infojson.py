@@ -4,6 +4,7 @@ from csvcubeddevtools.behaviour.temporarydirectory import get_context_temp_dir_p
 import pandas as pd
 from behave import Step, When, Then
 from csvcubed.writers.qbwriter import QbWriter
+from csvcubed.models.cube.uristyle import URIStyle
 
 import gssutils.csvcubedintegration.configloaders.infojson as infojsonloader
 
@@ -57,3 +58,8 @@ def step_impl(context):
     actual_errors: list[str] = [e.message for e in context.json_schema_errors]
     expected_error: str = context.text.strip()
     assert expected_error in actual_errors
+
+
+@Then("the cube should be configured with WithoutFileExtensions uri style")
+def step_impl(context):
+    assert context.cube.uri_style == URIStyle.WithoutFileExtensions, f"Expected URIStyle.WithoutFileExtensions but found {context.cube.uri_style}"

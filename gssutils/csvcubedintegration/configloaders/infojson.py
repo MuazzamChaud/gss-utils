@@ -93,8 +93,14 @@ def _from_info_json_dict(
     columns = _columns_from_info_json(
         transform_section.get("columns", []), data, info_json_parent_dir
     )
+    uri_style = _uri_style_from_transform(transform_section)
 
-    return Cube(metadata, data, columns)
+    return Cube(metadata, data, columns, uri_style)
+
+def _uri_style_from_transform(transform_section):
+    if "csvcubed_uri_style" in transform_section:
+        return URIStyle[transform_section["csvcubed_uri_style"]]
+    return URIStyle.Standard
 
 
 def _metadata_from_dict(config: dict) -> "CatalogMetadata":
