@@ -30,14 +30,6 @@
             ],
             "version": "==1.4.4"
         },
-        "appnope": {
-            "hashes": [
-                "sha256:02bd91c4de869fbb1e1c50aafc4098827a7a54ab2f39d9dcba6c9547ed920e24",
-                "sha256:265a455292d0bd8a72453494fa24df5a11eb18373a60c7c0430889f22548605e"
-            ],
-            "markers": "sys_platform == 'darwin'",
-            "version": "==0.1.3"
-        },
         "argparse": {
             "hashes": [
                 "sha256:62b089a55be1d8949cd2bc7e0df0bddb9e028faefc8c32038cc84862aefdd6e4",
@@ -148,7 +140,7 @@
                 "sha256:211800f725cdecedcbcf4c753bbd22d248312b37d130f06045434acb7d9b34e1",
                 "sha256:35dd9063244263e63bd0bd24ea61e3015b00272cead084b2c40d788b0f857c46"
             ],
-            "markers": "python_version >= '3.7' and python_version < '4'",
+            "markers": "python_version >= '3.7' and python_version < '4.0'",
             "version": "==1.10.0"
         },
         "cerberus": {
@@ -199,24 +191,24 @@
         },
         "csvcubed": {
             "hashes": [
-                "sha256:345354bf75c11fea2007ba698076e86ab5850b531f4c8379fb176c527aa4cfe7"
+                "sha256:5e9285a35037d82377536dab247a6f0c686bb11ec51d2e04e430c113c10d4a69"
             ],
-            "markers": "python_version >= '3.9' and python_version < '4'",
-            "version": "==0.1.0rc11"
+            "markers": "python_version >= '3.9' and python_version < '4.0'",
+            "version": "==0.1.0rc12"
         },
         "csvcubed-devtools": {
             "hashes": [
-                "sha256:338b43cd17ff5d1f4a9ec1438a54df533eb98d5ea649cb2bcc60e0f304d53164"
+                "sha256:e758df2341737d0b146ec2eedd54f32dd0b6c671ab6bf893be1a7a160c80f85c"
             ],
             "index": "pypi",
-            "version": "==0.1.0rc11"
+            "version": "==0.1.0rc12"
         },
         "csvcubed-models": {
             "hashes": [
-                "sha256:fc0ef4f5816cbe2300d0f579004f7a6319eeea95bf048f1ffcae67d40466f20e"
+                "sha256:3a0dc702aae0fb58cb479fc31282763b7ef2379f622ea75ac0df6d3b9a31c56a"
             ],
-            "markers": "python_version >= '3.9' and python_version < '4'",
-            "version": "==0.1.0rc11"
+            "markers": "python_version >= '3.9' and python_version < '4.0'",
+            "version": "==0.1.0rc12"
         },
         "csvcubed-pydantic": {
             "hashes": [
@@ -845,7 +837,7 @@
                 "sha256:0def7ec3363f58b38a43dc59b2078fcee67b47301fd51a41b8e34e6f79812b1a",
                 "sha256:6ceda7145a3088494d8ca68fded4b0473022dc62eb786a021c137632c44298b5"
             ],
-            "markers": "python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3' and python_version < '4'",
+            "markers": "python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3' and python_version < '4.0'",
             "version": "==3.2.0"
         },
         "pipfile": {
@@ -1063,9 +1055,7 @@
             "version": "==0.6.1"
         },
         "requests": {
-            "extras": [
-                "security"
-            ],
+            "extras": [],
             "hashes": [
                 "sha256:68d7c56fd5a8999887728ef304a6d12edc7be74f1cfa47714fc8b414525c9a61",
                 "sha256:f22fa1e554c9ddfd16e6e41ac79759e17be9e492b3587efa038054674760e72d"
@@ -1078,7 +1068,7 @@
                 "sha256:b32f8afba2439e1b3e12cba511c8f579271eff827f063210d62f9efa5bed6564",
                 "sha256:d8b32405b2725906aa09810f4796e54cc03029de269381b404c426bae927bada"
             ],
-            "markers": "python_version >= '3.7' and python_version < '4'",
+            "markers": "python_version >= '3.7' and python_version < '4.0'",
             "version": "==0.9.3"
         },
         "requirementslib": {
@@ -1121,11 +1111,11 @@
         },
         "soupsieve": {
             "hashes": [
-                "sha256:0bcc6d7432153063e3df09c3ac9442af3eba488715bfcad6a4c38ccb2a523124",
-                "sha256:a714129d3021ec17ce5be346b1007300558b378332c289a1a20e7d4de6ff18a5"
+                "sha256:3b2503d3c7084a42b1ebd08116e5f81aadfaea95863628c80a3b774a11b7c759",
+                "sha256:fc53893b3da2c33de295667a0e19f078c14bf86544af307354de5fcf12a3f30d"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==2.3.2"
+            "version": "==2.3.2.post1"
         },
         "sphinx": {
             "hashes": [
@@ -1219,7 +1209,7 @@
                 "sha256:3c517894eadef53e9072d343d37e4427b8f0b6200a70b7c9a19b2ebd1f53b951",
                 "sha256:3eba517439dcb2f84cf39f4f85fd2c3398309823a3c75ac3e73003638daf7915"
             ],
-            "markers": "python_version >= '3.6' and python_version < '4'",
+            "markers": "python_version >= '3.6' and python_version < '4.0'",
             "version": "==0.10.1"
         },
         "tox": {
@@ -1282,7 +1272,7 @@
                 "sha256:44ece4d53fb1706f667c9bd1c648f5469a2ec925fcf3a776667042d645472c14",
                 "sha256:aabaf16477806a5e1dd19aa41f8c2b7950dd3c746362d7e3223dbe6de6ac448e"
             ],
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4.0'",
             "version": "==1.26.9"
         },
         "vcrpy": {
@@ -1657,10 +1647,10 @@
         },
         "csvcubed-devtools": {
             "hashes": [
-                "sha256:338b43cd17ff5d1f4a9ec1438a54df533eb98d5ea649cb2bcc60e0f304d53164"
+                "sha256:e758df2341737d0b146ec2eedd54f32dd0b6c671ab6bf893be1a7a160c80f85c"
             ],
             "index": "pypi",
-            "version": "==0.1.0rc11"
+            "version": "==0.1.0rc12"
         },
         "csvw": {
             "hashes": [
@@ -1938,7 +1928,7 @@
                 "sha256:0def7ec3363f58b38a43dc59b2078fcee67b47301fd51a41b8e34e6f79812b1a",
                 "sha256:6ceda7145a3088494d8ca68fded4b0473022dc62eb786a021c137632c44298b5"
             ],
-            "markers": "python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3' and python_version < '4'",
+            "markers": "python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3' and python_version < '4.0'",
             "version": "==3.2.0"
         },
         "pipfile": {
@@ -2077,9 +2067,7 @@
             "version": "==6.1.1"
         },
         "requests": {
-            "extras": [
-                "security"
-            ],
+            "extras": [],
             "hashes": [
                 "sha256:68d7c56fd5a8999887728ef304a6d12edc7be74f1cfa47714fc8b414525c9a61",
                 "sha256:f22fa1e554c9ddfd16e6e41ac79759e17be9e492b3587efa038054674760e72d"
@@ -2127,11 +2115,11 @@
         },
         "soupsieve": {
             "hashes": [
-                "sha256:0bcc6d7432153063e3df09c3ac9442af3eba488715bfcad6a4c38ccb2a523124",
-                "sha256:a714129d3021ec17ce5be346b1007300558b378332c289a1a20e7d4de6ff18a5"
+                "sha256:3b2503d3c7084a42b1ebd08116e5f81aadfaea95863628c80a3b774a11b7c759",
+                "sha256:fc53893b3da2c33de295667a0e19f078c14bf86544af307354de5fcf12a3f30d"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==2.3.2"
+            "version": "==2.3.2.post1"
         },
         "sphinx": {
             "hashes": [
@@ -2218,7 +2206,7 @@
                 "sha256:3c517894eadef53e9072d343d37e4427b8f0b6200a70b7c9a19b2ebd1f53b951",
                 "sha256:3eba517439dcb2f84cf39f4f85fd2c3398309823a3c75ac3e73003638daf7915"
             ],
-            "markers": "python_version >= '3.6' and python_version < '4'",
+            "markers": "python_version >= '3.6' and python_version < '4.0'",
             "version": "==0.10.1"
         },
         "tox": {
@@ -2250,7 +2238,7 @@
                 "sha256:44ece4d53fb1706f667c9bd1c648f5469a2ec925fcf3a776667042d645472c14",
                 "sha256:aabaf16477806a5e1dd19aa41f8c2b7950dd3c746362d7e3223dbe6de6ac448e"
             ],
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4.0'",
             "version": "==1.26.9"
         },
         "vcrpy": {
