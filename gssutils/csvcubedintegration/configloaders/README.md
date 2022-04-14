@@ -294,3 +294,28 @@ The following stands as a minimal template for an info.json which you can use as
     }
 }
 ```
+
+## URI style
+
+Within a metadata file, URIs used to identify CSWV documents. Using the `csvcubed_uri_style` property of the `transform` section of the info.json, you can select from several pre-defined styles.
+
+*Note: this property will not effect the `csvw:url` or `csvw:reference` values - only those used to identify the documents*
+
+```json
+{
+    "id": "some-dataset"
+    ...
+    "transform": {
+        "csvcubed_uri_style": "WithoutFileExtensions",
+        "columns": {
+            // Column definitions go here.
+        }
+    },
+    ...
+}
+```
+
+| URI style | manifest |
+| --- | --- |
+| Standard (the default) | <pre>{<br />    "@context": "http://www.w3.org/ns/csvw",<br />    "@id": "some-dataset.csv#dataset",</pre> |
+| WithoutFileExtensions | <pre>{<br />    "@context": "http://www.w3.org/ns/csvw",<br />    "@id": "some-dataset#dataset",</pre> |

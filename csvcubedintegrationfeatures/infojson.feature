@@ -39,6 +39,12 @@ Feature: info.json loader with serialisation
     component:unit qb:attribute <http://purl.org/linked-data/sdmx/2009/attribute#unitMeasure>.
     """
 
+  Scenario: Using the info.json config loader when the config specifies a URI style
+    Given the existing test-case file "configloaders/single-measure-info-json-test-files/single-measure-data.csv"
+    And the existing test-case file "configloaders/single-measure-info-json-test-files/single-measure-info-WithoutFileExtensions.json"
+    When we load a cube using the info.json from "configloaders/single-measure-info-json-test-files/single-measure-info-WithoutFileExtensions.json" with CSV from "configloaders/single-measure-info-json-test-files/single-measure-data.csv"
+    Then the cube should be configured with WithoutFileExtensions uri style
+
   Scenario: Using the info.json config loader, a multi-measure csv can be correctly serialised and converted to the correct RDF
     Given the existing test-case file "configloaders/multi-measure-info-json-test-files/multi-measure-data.csv"
     And the existing test-case file "configloaders/multi-measure-info-json-test-files/multi-measure-info.json"
