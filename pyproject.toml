@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "gss-utils"
+name = "gssutils"
 version = "0.1.0"
 description = "Common functions used by GSS data transformations"
 authors = ["Your Name <you@example.com>"]
