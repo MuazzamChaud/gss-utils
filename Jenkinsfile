@@ -9,12 +9,12 @@ pipeline {
                 }
             }
             steps {
-                sh "python setup.py install --quiet" // Necessary for locally-defined command lines apps to be accessible for testing.
+                sh "poetry install" // Necessary for locally-defined command lines apps to be accessible for testing.
 
-                sh "pytest --junitxml=pytest_results.xml unittests"
+                sh "poetry run pytest --junitxml=pytest_results.xml unittests"
 
-                sh "behave -D record_mode=none --tags=-skip -f json.cucumber -o test-results-csvcubedintegration.json csvcubedintegrationfeatures"
-                sh "behave -D record_mode=none --tags=-skip -f json.cucumber -o test-results.json features"
+                sh "poetry run behave -D record_mode=none --tags=-skip -f json.cucumber -o test-results-csvcubedintegration.json csvcubedintegrationfeatures"
+                sh "poetry run behave -D record_mode=none --tags=-skip -f json.cucumber -o test-results.json features"
 
             }
         }

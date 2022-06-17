@@ -10,7 +10,7 @@ pipeline {
                 }
             }
             steps {
-                sh "behave -D record_mode=all --tags=-skip -f json.cucumber -o test-scraper-results.json features/scrape.feature"
+                sh "poetry run behave -D record_mode=all --tags=-skip -f json.cucumber -o test-scraper-results.json features/scrape.feature"
             }
         }
     }

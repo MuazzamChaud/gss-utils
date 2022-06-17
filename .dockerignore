@@ -1,4 +1,3 @@
 *
-!Pipfile*
-!cucumber-format.patch
-!setup.py
+!poetry.lock
+!pyproject.toml

@@ -32,14 +32,14 @@ def build(
 ):
     print(f"{Style.DIM}CSV: {csv_path.absolute()}")
     print(f"{Style.DIM}info.json: {info_json.absolute()}")
-    data = read_csv(csv_path)
-    assert isinstance(data, pd.DataFrame)
+    data, validation_errors = read_csv(csv_path)
+    assert isinstance(data, pd.DataFrame), data.__class__
     cube, json_schema_validation_errors = get_cube_from_info_json(info_json, data)
 
     if catalog_metadata_json_file is not None:
         _override_catalog_metadata_state(catalog_metadata_json_file, cube)
 
-    validation_errors = cube.validate()
+    validation_errors += cube.validate()
     validation_errors += validate_qb_component_constraints(cube)
 
     if not output_directory.exists():
@@ -48,7 +48,9 @@ def build(
 
     if len(validation_errors) > 0 or len(json_schema_validation_errors) > 0:
         for error in validation_errors:
-            print(f"{Fore.RED + Style.BRIGHT}Validation Error: {Style.NORMAL + error.message}")
+            print(
+                f"{Fore.RED + Style.BRIGHT}Validation Error: {Style.NORMAL + error.message}"
+            )
             if isinstance(error, SpecificValidationError):
                 print(f"More information: {error.get_error_url()}")
 

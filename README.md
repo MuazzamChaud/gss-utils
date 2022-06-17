@@ -6,14 +6,13 @@ Shared data transformation utilities for GSS data.
 
 #### Pre-requisites
 - Clone this repo
-- `pip install pipenv`
-- `pipenv --python 3.9`
+- `pip install poetry`
 
 #### Install dependencies
-- `pipenv sync --dev`
+- `poetry install`
 
 #### Start virtual environment shell
-- `pipenv shell`
+- `poetry shell`
  
 #### Test run
 - Run one of the utils which should now exist as a binary within the environment
@@ -38,7 +37,7 @@ Commands:
 
 When running a test with `record-mode=all` e.g.
 ```shell script
- pipenv run behave -D record_mode=all --tags=-skip -n '[Name of test]' features/scrape.feature
+ poetry run behave -D record_mode=all --tags=-skip -n '[Name of test]' features/scrape.feature
 ```
 the scrape.yml sections are not overwritten. Instead, new ones are appended.
 
@@ -46,7 +45,7 @@ the scrape.yml sections are not overwritten. Instead, new ones are appended.
 After running the tests, use the `clean-fixtures.py` script to remove repeated interactions.
 The run the same tests with `record-mode=none` to confirm they all pass.
 ```shell script
- pipenv run behave -D record_mode=none --tags=-skip -n '[Name of test]' features/scrape.feature
+ poetry run behave -D record_mode=none --tags=-skip -n '[Name of test]' features/scrape.feature
 ```
 
 Note, if you run into issues using `clean-fixtures.py` (this can happen as a result of other bad recordings being present) you

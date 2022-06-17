@@ -1,3 +1,59 @@
+[tool.poetry]
+name = "gssutils"
+version = "0.1.0"
+description = "Common functions used by GSS data transformations"
+authors = ["Your Name <you@example.com>"]
+license = "Apache-2.0"
+packages = [
+  {include = "gssutils"},
+]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "~3.9"
+requests = "*"
+python_dateutil = "*"
+CacheControl= "0.12.6"  # Pinned as later versions causing failure of current (16/12/2021) api scraper tests
+lockfile = "*"
+ipython = "*"
+jinja2 = "*"
+pandas = "*"
+html2text = "*"
+rdflib = ">=6.0.0"
+rdflib-jsonld = "0.6.1"
+lxml = "*"
+unidecode = "*"
+argparse = "*"
+wheel = "*"
+uritemplate = "*"
+backoff = "*"
+pyRdfa3 = "*"
+csvcubed = "0.1.3"
+csvcubed-pydantic = ">=1.9.0"
+click = "~=8.0.1"
+colorama = "~=0.4.4"
+jsonschema = "~=4.4.0"
+pyparsing= "2.4.7"
+# xypath doesn't pin the version of pyhamcrest currently used
+# version 2.0.3 breaks functionality we're using.
+pyhamcrest = "<=2.0.2"
+vcrpy = "~=4.1.1"
+databaker = {git = "https://github.com/GSS-Cogs/databaker", rev = "2dc3f373910a657aa506ba96ba0f2f0bdf488522"}
+
+[tool.poetry.dev-dependencies]
+behave = "*"
+nose = "*"
+vcrpy = "*"
+docker = "*"
+pipenv-setup = "*"
+pytest = "*"
+csvcubed-devtools = "*"
+csvw = "*"
+
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta:__legacy__"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+codelist-manager = 'gssutils.codelistmanager.main:codelist_manager'
+infojson2csvqb = 'gssutils.csvcubedintegration.infojson2csvqb.entrypoint:entry_point'
