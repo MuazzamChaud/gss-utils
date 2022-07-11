@@ -1,3 +1,4 @@
+from pathlib import Path
 import pytest
 import pandas as pd
 from csvcubed.utils.iterables import first
@@ -16,12 +17,12 @@ def test_units_loading():
     Test that multi-units columns with existing and new units can be successfully loaded using the new
     info.json v1.1 syntax using all possible configuration types.
     """
-    data = pd.read_csv(
-        get_test_cases_dir() / "configloaders" / "infojson1-1" / "units.csv"
-    )
-    cube, json_schema_validation_error = get_cube_from_info_json(
-        get_test_cases_dir() / "configloaders" / "infojson1-1" / "units.json",
-        data,
+    csv_path = Path(info_json_1_1_test_cases_dir / "units.csv")
+    info_json_path = Path(info_json_1_1_test_cases_dir / "units.json")
+    
+    cube, _, _ = get_cube_from_info_json(
+        info_json_path,
+        csv_path,
     )
 
     existing_units = _get_column_definition(cube, "Existing Units")
@@ -84,12 +85,12 @@ def test_measures_loading():
     Test that multi-measure dimensions with existing and new measures can be successfully loaded using the new
     info.json v1.1 syntax using all possible configuration types.
     """
-    data = pd.read_csv(
-        get_test_cases_dir() / "configloaders" / "infojson1-1" / "measures.csv"
-    )
-    cube, json_schema_validation_error = get_cube_from_info_json(
-        get_test_cases_dir() / "configloaders" / "infojson1-1" / "measures.json",
-        data,
+
+    csv_path = Path(info_json_1_1_test_cases_dir / "measures.csv")
+    info_json_path = Path(info_json_1_1_test_cases_dir / "measures.json")
+    
+    cube, _, _ = get_cube_from_info_json(
+        info_json_path, csv_path
     )
 
     existing_measures = _get_column_definition(cube, "Existing Measures")
@@ -141,10 +142,12 @@ def test_observation_value_loading():
     Test that single and multi-measure observation value columns can be successfully loaded using the new
     info.json v1.1 syntax using all possible configuration types.
     """
-    data = pd.read_csv(info_json_1_1_test_cases_dir / "observations.csv")
-    cube, json_schema_validation_error = get_cube_from_info_json(
-        info_json_1_1_test_cases_dir / "observations.json",
-        data,
+
+    csv_path = Path(info_json_1_1_test_cases_dir / "observations.csv")
+    info_json_path = Path(info_json_1_1_test_cases_dir / "observations.json")
+    
+    cube, _, _ = get_cube_from_info_json(
+        info_json_path, csv_path
     )
 
     single_measure = _get_column_definition(cube, "Single Measure Value")
@@ -204,10 +207,12 @@ def test_dimension_loading():
     Test that existing and new dimensions can be successfully loaded using the new info.json v1.1 syntax using all
     possible configuration types.
     """
-    data = pd.read_csv(info_json_1_1_test_cases_dir / "dimensions.csv")
-    cube, json_schema_validation_error = get_cube_from_info_json(
-        info_json_1_1_test_cases_dir / "dimensions.json",
-        data,
+
+    csv_path = Path(info_json_1_1_test_cases_dir / "dimensions.csv")
+    info_json_path = Path(info_json_1_1_test_cases_dir / "dimensions.json")
+    
+    cube, _, _ = get_cube_from_info_json(
+        info_json_path, csv_path
     )
 
     existing_dimension = _get_column_definition(cube, "Existing Dimension")
@@ -315,10 +320,12 @@ def test_attribute_loading():
     Test that existing and new attributes can be successfully loaded using the new info.json v1.1 syntax using all
     possible configuration types.
     """
-    data = pd.read_csv(info_json_1_1_test_cases_dir / "attributes.csv")
-    cube, json_schema_validation_error = get_cube_from_info_json(
-        info_json_1_1_test_cases_dir / "attributes.json",
-        data,
+
+    csv_path = Path(info_json_1_1_test_cases_dir / "attributes.csv")
+    info_json_path = Path(info_json_1_1_test_cases_dir / "attributes.json")
+    
+    cube, _, _ = get_cube_from_info_json(
+        info_json_path, csv_path
     )
 
     existing_marker = _get_column_definition(cube, "Existing Marker")

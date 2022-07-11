@@ -9,9 +9,9 @@ from typing import Dict, List, Any, Tuple
 from pathlib import Path
 import json
 import copy
-import pandas as pd
 import uritemplate
 from dateutil import parser
+
 from csvcubedmodels.rdf.namespaces import GOV, GDP
 from csvcubed.models.cube import *
 from gssutils.utils import pathify
@@ -20,12 +20,14 @@ from csvcubed.utils.dict import get_from_dict_ensure_exists, get_with_func_or_no
 from csvcubed.utils.pandas import read_csv
 from csvcubed.inputs import pandas_input_to_columnar_str, PandasDataTypes
 from csvcubed.models.validationerror import ValidationError
+from jsonschema.exceptions import ValidationError as JsonSchemaValidationError
+import pandas as pd
 
+from gssutils.csvcubedintegration.configloaders.constants import ALL_RESERVED_COLUMN_NAMES
 from gssutils.csvcubedintegration.configloaders.jsonschemavalidation import (
     validate_dict_against_schema_url,
 )
 import gssutils.csvcubedintegration.configloaders.infojson1point1.mapcolumntocomponent as v1point1
-from jsonschema.exceptions import ValidationError as JsonSchemaValidationError
 
 
 def get_schema_errors(info_json: Path) -> List[JsonSchemaValidationError]:
@@ -84,11 +86,11 @@ def _override_config_for_cube_id(config: Dict, cube_id: str) -> Optional[dict]:
 
 def _from_info_json_dict(
     config: Dict, csv_path: Path, info_json_parent_dir: Path
-) -> QbCube:
+) -> Tuple[QbCube, List[ValidationError], List[JsonSchemaValidationError]]:
 
     info_json_schema_url = "https://raw.githubusercontent.com/GSS-Cogs/family-schemas/main/dataset-schema-1.1.0.json"
 
-    errors = validate_dict_against_schema_url(
+    json_schema_validation_errors = validate_dict_against_schema_url(
         value=config, schema_url=info_json_schema_url
     )
 
@@ -96,12 +98,28 @@ def _from_info_json_dict(
     # This is necessary to stop pandas type assumptions altering outputs on the csv write,
     # by default a column of eg: ["04", "4"] would be assumed as numerical by pandas and
     # output as [4, 4]. In the context of a dimension 4 != 04
-    dtypes = {
-        column_label: str
+    columns_with_type: Dict[str:Dict] = {
+        column_label: column_config
         for column_label, column_config in config["transform"]["columns"].items()
-        if column_config["type"] == "dimension"
+        if "type" in column_config
     }
+    dimension_columns: List[str] = [
+        column_label
+        for column_label, column_config in columns_with_type.items()
+        if column_config["type"] == "dimension"
+    ]
+
+    # Column without a type are also assumed to be a dimension
+    # unless its a reserved column.
+    dimension_columns += [
+        column_label
+        for column_label in config["transform"]["columns"]
+        if column_label not in columns_with_type and column_label not in ALL_RESERVED_COLUMN_NAMES
+    ]
+    dtypes = {column_label: str for column_label in dimension_columns}
+
     data, validation_errors = read_csv(csv_path, dtype=dtypes)
+    assert isinstance(data, pd.DataFrame), data.__class__
 
     metadata = _metadata_from_dict(config)
     transform_section = config.get("transform", {})
@@ -111,7 +129,7 @@ def _from_info_json_dict(
     )
     uri_style = _uri_style_from_transform(transform_section)
 
-    return Cube(metadata, data, columns, uri_style), errors, validation_errors
+    return Cube(metadata, data, columns, uri_style), validation_errors, json_schema_validation_errors
 
 
 def _uri_style_from_transform(transform_section):

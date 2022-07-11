@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import List
 
 import pytest
@@ -9,8 +10,9 @@ from csvcubed.utils.qb.validation.cube import validate_qb_component_constraints
 from csvcubed.models.cube import *
 from csvcubeddevtools.helpers.file import get_test_cases_dir
 
-
 from gssutils.csvcubedintegration.configloaders.infojson import get_cube_from_info_json
+
+config_loaders_test_case_dir = Path(get_test_cases_dir() / "configloaders" )
 
 
 def test_csv_cols_assumed_dimensions():
@@ -22,9 +24,13 @@ def test_csv_cols_assumed_dimensions():
 
     Assert that the newly defined dimension has a codelist created from the values in the CSV.
     """
-    data = pd.read_csv(get_test_cases_dir() / "configloaders" / "data.csv")
-    cube, json_schema_validation_error = get_cube_from_info_json(
-        get_test_cases_dir() / "configloaders" / "info.json", data
+
+    csv_path = Path(config_loaders_test_case_dir / "data.csv")
+    info_json_path = Path(config_loaders_test_case_dir / "info.json")
+    
+    cube, _, _ = get_cube_from_info_json(
+        info_json_path,
+        csv_path,
     )
 
     matching_columns = [
@@ -65,18 +71,12 @@ def test_multiple_measures_and_units_loaded_in_uri_template():
     to be found at <https://github.com/GSS-Cogs/family-schemas/blob/main/dataset-schema.json>.
     """
 
-    data = pd.read_csv(
-        get_test_cases_dir()
-        / "configloaders"
-        / "multi-measure-multi-unit-test-files"
-        / "multi-measure-unit-data.csv"
-    )
-    cube, json_schema_validation_error = get_cube_from_info_json(
-        get_test_cases_dir()
-        / "configloaders"
-        / "multi-measure-multi-unit-test-files"
-        / "multi-measure-unit-info.json",
-        data,
+    csv_path = Path(config_loaders_test_case_dir / "multi-measure-multi-unit-test-files" / "multi-measure-unit-data.csv")
+    info_json_path = Path(config_loaders_test_case_dir / "multi-measure-multi-unit-test-files" / "multi-measure-unit-info.json")
+
+    cube, _, _ = get_cube_from_info_json(
+        info_json_path,
+        csv_path,
     )
 
     """Measure URI"""
@@ -125,18 +125,12 @@ def test_cube_metadata_extracted_from_info_json():
     'license', 'public_contact_point', 'publisher', 'summary', 'themes', 'title',
     'uri_safe_identifier', 'validate']"""
 
-    data = pd.read_csv(
-        get_test_cases_dir()
-        / "configloaders"
-        / "multi-measure-multi-unit-test-files"
-        / "multi-measure-unit-data.csv"
-    )
-    cube, json_schema_validation_error = get_cube_from_info_json(
-        get_test_cases_dir()
-        / "configloaders"
-        / "multi-measure-multi-unit-test-files"
-        / "multi-measure-unit-info.json",
-        data,
+    csv_path = Path(config_loaders_test_case_dir / "multi-measure-multi-unit-test-files" / "multi-measure-unit-data.csv")
+    info_json_path = Path(config_loaders_test_case_dir / "multi-measure-multi-unit-test-files" / "multi-measure-unit-info.json")
+
+    cube, _, _ = get_cube_from_info_json(
+        info_json_path,
+        csv_path,
     )
 
     # Creator - pass
@@ -231,10 +225,20 @@ def test_single_measure_obs_val_unit_measure_data_type():
     """
     Test that the datatype, unit & measure are correctly extracted from a single-measure dataset's info.json file
     """
-    data = pd.read_csv(get_test_cases_dir() / "configloaders" / "data.csv")
-    cube, json_schema_validation_error = get_cube_from_info_json(
-        get_test_cases_dir() / "configloaders" / "info.json", data
+
+    csv_path = Path(config_loaders_test_case_dir / "data.csv")
+    info_json_path = Path(config_loaders_test_case_dir / "info.json")
+
+    cube, _, _ = get_cube_from_info_json(
+        info_json_path,
+        csv_path,
     )
+
+    msg = ""
+    for column in cube.columns:
+        msg += str(column)
+
+    #raise Exception(msg)
 
     obs_val_cols = get_columns_of_dsd_type(cube, QbSingleMeasureObservationValue)
     assert len(obs_val_cols) == 1
@@ -263,21 +267,13 @@ def test_definitions_loaded_for_columns_not_in_data():
 
     This is primarily to ensure that cube validation highlights that they've defined columns which aren't in the data.
     """
-    data = pd.read_csv(
-        get_test_cases_dir()
-        / "configloaders"
-        / "multi-measure-multi-unit-test-files"
-        / "multi-measure-unit-data.csv"
-    )
 
-    del data["Unit"]  # delete a column from the data
+    csv_path = Path(config_loaders_test_case_dir / "multi-measure-multi-unit-test-files" / "multi-measure-unit-data-missing-unit.csv")
+    info_json_path = Path(config_loaders_test_case_dir / "multi-measure-multi-unit-test-files" / "multi-measure-unit-info.json")
 
-    cube, json_schema_validation_error = get_cube_from_info_json(
-        get_test_cases_dir()
-        / "configloaders"
-        / "multi-measure-multi-unit-test-files"
-        / "multi-measure-unit-info.json",
-        data,
+    cube, _, _ = get_cube_from_info_json(
+        info_json_path,
+        csv_path,
     )
 
     errors = cube.validate()
