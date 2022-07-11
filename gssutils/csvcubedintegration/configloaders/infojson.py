@@ -9,7 +9,6 @@ from typing import Dict, List, Any, Tuple
 from pathlib import Path
 import json
 import copy
-from numpy import dtype
 import pandas as pd
 import uritemplate
 from dateutil import parser
