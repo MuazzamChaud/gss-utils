@@ -9,6 +9,7 @@ from typing import Dict, List, Any, Tuple
 from pathlib import Path
 import json
 import copy
+from numpy import dtype
 import pandas as pd
 import uritemplate
 from dateutil import parser
@@ -17,16 +18,18 @@ from csvcubed.models.cube import *
 from gssutils.utils import pathify
 from csvcubed.utils.uri import csvw_column_name_safe, uri_safe
 from csvcubed.utils.dict import get_from_dict_ensure_exists, get_with_func_or_none
+from csvcubed.utils.pandas import read_csv
 from csvcubed.inputs import pandas_input_to_columnar_str, PandasDataTypes
+from csvcubed.models.validationerror import ValidationError
 
 from gssutils.csvcubedintegration.configloaders.jsonschemavalidation import (
     validate_dict_against_schema_url,
 )
 import gssutils.csvcubedintegration.configloaders.infojson1point1.mapcolumntocomponent as v1point1
-from jsonschema.exceptions import ValidationError
+from jsonschema.exceptions import ValidationError as JsonSchemaValidationError
 
 
-def get_schema_errors(info_json: Path) -> List[ValidationError]:
+def get_schema_errors(info_json: Path) -> List[JsonSchemaValidationError]:
     with open(info_json, "r") as f:
         info_json_contents = json.load(f)
 
@@ -38,20 +41,15 @@ def get_schema_errors(info_json: Path) -> List[ValidationError]:
 
 
 def get_cube_from_info_json(
-    info_json: Path, data: pd.DataFrame, cube_id: Optional[str] = None
-) -> Tuple[QbCube, List[ValidationError]]:
+    info_json: Path, csv_path: Path, cube_id: Optional[str] = None
+) -> Tuple[QbCube, List[ValidationError], List[JsonSchemaValidationError]]:
     """
     Generates a QbCube structure from an info.json input.
     :return: tuple of cube and json schema errors (if any)
     """
+
     with open(info_json, "r") as f:
         config = json.load(f)
-
-    info_json_schema_url = "https://raw.githubusercontent.com/GSS-Cogs/family-schemas/main/dataset-schema-1.1.0.json"
-
-    errors = validate_dict_against_schema_url(
-        value=config, schema_url=info_json_schema_url
-    )
 
     if cube_id is not None:
         config = _override_config_for_cube_id(config, cube_id)
@@ -59,10 +57,10 @@ def get_cube_from_info_json(
     if config is None:
         raise Exception(f"Config not found for cube with id '{cube_id}'")
 
-    return _from_info_json_dict(config, data, info_json.parent.absolute()), errors
+    return _from_info_json_dict(config, csv_path, info_json.parent.absolute())
 
 
-def _override_config_for_cube_id(config: dict, cube_id: str) -> Optional[dict]:
+def _override_config_for_cube_id(config: Dict, cube_id: str) -> Optional[dict]:
     """
     Apply cube config overrides contained inside the `cubes` dictionary to get the config for the given `cube_id`
     """
@@ -86,16 +84,36 @@ def _override_config_for_cube_id(config: dict, cube_id: str) -> Optional[dict]:
 
 
 def _from_info_json_dict(
-    d: Dict, data: pd.DataFrame, info_json_parent_dir: Path
+    config: Dict, csv_path: Path, info_json_parent_dir: Path
 ) -> QbCube:
-    metadata = _metadata_from_dict(d)
-    transform_section = d.get("transform", {})
+
+    info_json_schema_url = "https://raw.githubusercontent.com/GSS-Cogs/family-schemas/main/dataset-schema-1.1.0.json"
+
+    errors = validate_dict_against_schema_url(
+        value=config, schema_url=info_json_schema_url
+    )
+
+    # Dimensions are always type str
+    # This is necessary to stop pandas type assumptions altering outputs on the csv write,
+    # by default a column of eg: ["04", "4"] would be assumed as numerical by pandas and
+    # output as [4, 4]. In the context of a dimension 4 != 04
+    dtypes = {
+        column_label: str
+        for column_label, column_config in config["transform"]["columns"].items()
+        if column_config["type"] == "dimension"
+    }
+    data, validation_errors = read_csv(csv_path, dtype=dtypes)
+
+    metadata = _metadata_from_dict(config)
+    transform_section = config.get("transform", {})
+
     columns = _columns_from_info_json(
         transform_section.get("columns", []), data, info_json_parent_dir
     )
     uri_style = _uri_style_from_transform(transform_section)
 
-    return Cube(metadata, data, columns, uri_style)
+    return Cube(metadata, data, columns, uri_style), errors, validation_errors
+
 
 def _uri_style_from_transform(transform_section):
     if "csvcubed_uri_style" in transform_section:
@@ -103,7 +121,7 @@ def _uri_style_from_transform(transform_section):
     return URIStyle.Standard
 
 
-def _metadata_from_dict(config: dict) -> "CatalogMetadata":
+def _metadata_from_dict(config: Dict) -> "CatalogMetadata":
     publisher = get_with_func_or_none(
         config, "publisher", lambda p: str(GOV[uri_safe(p)])
     )
@@ -123,7 +141,9 @@ def _metadata_from_dict(config: dict) -> "CatalogMetadata":
         dataset_issued=dt_issued,
         theme_uris=theme_uris,
         keywords=config.get("keywords", []),
-        landing_page_uris=landing_page_value if isinstance(landing_page_value, list) else [landing_page_value],
+        landing_page_uris=landing_page_value
+        if isinstance(landing_page_value, list)
+        else [landing_page_value],
         license_uri=config.get("license"),
         public_contact_point_uri=config.get("contactUri"),
         uri_safe_identifier_override=get_from_dict_ensure_exists(config, "id"),
