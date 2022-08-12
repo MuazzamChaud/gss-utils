@@ -18,7 +18,6 @@ from csvcubed.models.cube.qb import QbCube
 from csvcubed.models.cube.qb.catalog import CatalogMetadata
 from csvcubedmodels.dataclassbase import DataClassBase
 
-pd.DataFrame.shape
 from gssutils.csvcubedintegration.configloaders.infojson import get_cube_from_config
 
 
