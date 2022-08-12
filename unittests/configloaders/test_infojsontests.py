@@ -276,7 +276,6 @@ def test_definitions_loaded_for_columns_not_in_data():
         / "multi-measure-multi-unit-test-files"
         / "multi-measure-missing-unit-data.csv")
 
-    # Note: we're not loading the Unit column for this test, see "usecols"
     cube, _ = get_cube_from_config(
         config_path, data_path
     )
