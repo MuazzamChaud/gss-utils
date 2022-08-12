@@ -17,9 +17,9 @@ from csvcubed.models.cube import SpecificValidationError
 from csvcubed.models.cube.qb import QbCube
 from csvcubed.models.cube.qb.catalog import CatalogMetadata
 from csvcubedmodels.dataclassbase import DataClassBase
-from csvcubed.utils.pandas import read_csv
 
-from gssutils.csvcubedintegration.configloaders.infojson import get_cube_from_info_json
+pd.DataFrame.shape
+from gssutils.csvcubedintegration.configloaders.infojson import get_cube_from_config
 
 
 def build(
@@ -32,9 +32,8 @@ def build(
 ):
     print(f"{Style.DIM}CSV: {csv_path.absolute()}")
     print(f"{Style.DIM}info.json: {info_json.absolute()}")
-    data, validation_errors = read_csv(csv_path)
-    assert isinstance(data, pd.DataFrame), data.__class__
-    cube, json_schema_validation_errors = get_cube_from_info_json(info_json, data)
+
+    cube, json_schema_validation_errors = get_cube_from_config(config_path=info_json, data_path=csv_path)
 
     if catalog_metadata_json_file is not None:
         _override_catalog_metadata_state(catalog_metadata_json_file, cube)

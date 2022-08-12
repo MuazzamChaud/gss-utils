@@ -18,6 +18,8 @@ from gssutils.utils import pathify
 from csvcubed.utils.uri import csvw_column_name_safe, uri_safe
 from csvcubed.utils.dict import get_from_dict_ensure_exists, get_with_func_or_none
 from csvcubed.inputs import pandas_input_to_columnar_str, PandasDataTypes
+from csvcubed.utils.pandas import read_csv
+from csvcubed.readers.cubeconfig.v1 import datatypes
 
 from gssutils.csvcubedintegration.configloaders.jsonschemavalidation import (
     validate_dict_against_schema_url,
@@ -37,16 +39,20 @@ def get_schema_errors(info_json: Path) -> List[ValidationError]:
     return schema_errors
 
 
-def get_cube_from_info_json(
-    info_json: Path, data: pd.DataFrame, cube_id: Optional[str] = None
+def get_cube_from_config(
+    config_path: Path, data_path: Path, cube_id: Optional[str] = None
 ) -> Tuple[QbCube, List[ValidationError]]:
     """
     Generates a QbCube structure from an info.json input.
     :return: tuple of cube and json schema errors (if any)
     """
-    with open(info_json, "r") as f:
+    
+    with open(config_path, "r") as f:
         config = json.load(f)
 
+    dtype = datatypes.get_pandas_datatypes(data_path, config=config)
+    data, _ = read_csv(data_path, dtype=dtype)
+    
     info_json_schema_url = "https://raw.githubusercontent.com/GSS-Cogs/family-schemas/main/dataset-schema-1.1.0.json"
 
     errors = validate_dict_against_schema_url(
@@ -59,7 +65,7 @@ def get_cube_from_info_json(
     if config is None:
         raise Exception(f"Config not found for cube with id '{cube_id}'")
 
-    return _from_info_json_dict(config, data, info_json.parent.absolute()), errors
+    return _from_info_json_dict(config, data, config_path.parent.absolute()), errors
 
 
 def _override_config_for_cube_id(config: dict, cube_id: str) -> Optional[dict]:
