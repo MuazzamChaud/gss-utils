@@ -9,12 +9,11 @@ import json
 
 from colorama import Fore, Style
 from pathlib import Path
-import pandas as pd
 from typing import Optional
 from csvcubed.writers.qbwriter import QbWriter
 from csvcubed.utils.qb.validation.cube import validate_qb_component_constraints
 from csvcubed.models.cube import SpecificValidationError
-from csvcubed.models.cube.qb import QbCube
+from csvcubed.models.cube import QbCube
 from csvcubed.models.cube.qb.catalog import CatalogMetadata
 from csvcubedmodels.dataclassbase import DataClassBase
 
@@ -37,7 +36,7 @@ def build(
     if catalog_metadata_json_file is not None:
         _override_catalog_metadata_state(catalog_metadata_json_file, cube)
 
-    validation_errors += cube.validate()
+    validation_errors = cube.validate()
     validation_errors += validate_qb_component_constraints(cube)
 
     if not output_directory.exists():

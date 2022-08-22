@@ -14,11 +14,10 @@ import gssutils.csvcubedintegration.configloaders.infojson as infojsonloader
 )
 def step_impl(context, some_json, some_csv):
     tmp_dir = get_context_temp_dir_path(context)
-    data = pd.read_csv(tmp_dir / some_csv)
 
     cube_value, json_schema_errors = infojsonloader.get_cube_from_info_json(
         tmp_dir / some_json,
-        data,
+        tmp_dir / some_csv,
     )
 
     context.cube = cube_value
