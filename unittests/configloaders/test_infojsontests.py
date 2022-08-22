@@ -31,7 +31,7 @@ def test_csv_cols_assumed_dimensions():
     config_path = Path(config_loader_test_cases_dir / "info.json")
     data_path = Path(config_loader_test_cases_dir / "data.csv")
 
-    cube, _ = get_cube_from_info_json(
+    cube, _, _ = get_cube_from_info_json(
         config_path, data_path
     )
 
@@ -81,7 +81,7 @@ def test_multiple_measures_and_units_loaded_in_uri_template():
         / "multi-measure-unit-data.csv")
 
 
-    cube, _ = get_cube_from_info_json(
+    cube, _, _ = get_cube_from_info_json(
         config_path, data_path
     )
 
@@ -137,7 +137,7 @@ def test_cube_metadata_extracted_from_info_json():
         / "multi-measure-multi-unit-test-files"
         / "multi-measure-unit-data.csv")
 
-    cube, _ = get_cube_from_info_json(
+    cube, _, _ = get_cube_from_info_json(
         config_path, data_path
     )
 
@@ -237,7 +237,7 @@ def test_single_measure_obs_val_unit_measure_data_type():
     config_path = Path(config_loader_test_cases_dir / "info.json")
     data_path = Path(config_loader_test_cases_dir / "data.csv")
 
-    cube, _ = get_cube_from_info_json(
+    cube, _, _ = get_cube_from_info_json(
         config_path, data_path
     )
 
@@ -276,7 +276,7 @@ def test_definitions_loaded_for_columns_not_in_data():
         / "multi-measure-multi-unit-test-files"
         / "multi-measure-missing-unit-data.csv")
 
-    cube, _ = get_cube_from_info_json(
+    cube, _, _ = get_cube_from_info_json(
         config_path, data_path
     )
 

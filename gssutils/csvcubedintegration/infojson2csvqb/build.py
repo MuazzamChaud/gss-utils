@@ -31,12 +31,12 @@ def build(
     print(f"{Style.DIM}CSV: {csv_path.absolute()}")
     print(f"{Style.DIM}info.json: {info_json.absolute()}")
 
-    cube, json_schema_validation_errors = get_cube_from_info_json(info_json_path=info_json, data_path=csv_path)
+    cube, validation_errors, json_schema_validation_errors = get_cube_from_info_json(info_json_path=info_json, data_path=csv_path)
 
     if catalog_metadata_json_file is not None:
         _override_catalog_metadata_state(catalog_metadata_json_file, cube)
 
-    validation_errors = cube.validate()
+    validation_errors += cube.validate()
     validation_errors += validate_qb_component_constraints(cube)
 
     if not output_directory.exists():

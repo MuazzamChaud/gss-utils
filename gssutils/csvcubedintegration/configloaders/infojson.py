@@ -14,34 +14,25 @@ import uritemplate
 from dateutil import parser
 from csvcubedmodels.rdf.namespaces import GOV, GDP
 from csvcubed.models.cube import *
-from gssutils.utils import pathify
+from csvcubed.models.validationerror import ValidationError
 from csvcubed.utils.uri import csvw_column_name_safe, uri_safe
 from csvcubed.utils.dict import get_from_dict_ensure_exists, get_with_func_or_none
 from csvcubed.inputs import pandas_input_to_columnar_str, PandasDataTypes
 from csvcubed.utils.pandas import read_csv
 from csvcubed.readers.cubeconfig.v1 import datatypes
+from jsonschema.exceptions import ValidationError as JsonSchemeValidationError
+
 
 from gssutils.csvcubedintegration.configloaders.jsonschemavalidation import (
     validate_dict_against_schema_url,
 )
 import gssutils.csvcubedintegration.configloaders.infojson1point1.mapcolumntocomponent as v1point1
-from jsonschema.exceptions import ValidationError
-
-
-def get_schema_errors(info_json: Path) -> List[ValidationError]:
-    with open(info_json, "r") as f:
-        info_json_contents = json.load(f)
-
-    schema_errors = validate_dict_against_schema_url(
-        info_json_contents,
-        "https://raw.githubusercontent.com/GSS-Cogs/family-schemas/main/dataset-schema-1.1.0.json",
-    )
-    return schema_errors
+from gssutils.utils import pathify
 
 
 def get_cube_from_info_json(
     info_json_path: Path, data_path: Path, cube_id: Optional[str] = None
-) -> Tuple[QbCube, List[ValidationError]]:
+) -> Tuple[QbCube, List[ValidationError], List[JsonSchemeValidationError]]:
     """
     Generates a QbCube structure from an info.json input.
     :return: tuple of cube and json schema errors (if any)
@@ -51,11 +42,11 @@ def get_cube_from_info_json(
         config = json.load(f)
 
     dtype = datatypes.get_pandas_datatypes(data_path, config=config)
-    data, errors = read_csv(data_path, dtype=dtype)
+    data, validation_errors = read_csv(data_path, dtype=dtype)
     
     info_json_schema_url = "https://raw.githubusercontent.com/GSS-Cogs/family-schemas/main/dataset-schema-1.1.0.json"
 
-    errors += validate_dict_against_schema_url(
+    json_schema_validation_errors = validate_dict_against_schema_url(
         value=config, schema_url=info_json_schema_url
     )
 
@@ -65,7 +56,7 @@ def get_cube_from_info_json(
     if config is None:
         raise Exception(f"Config not found for cube with id '{cube_id}'")
 
-    return _from_info_json_dict(config, data, info_json_path.parent.absolute()), errors
+    return _from_info_json_dict(config, data, info_json_path.parent.absolute()), validation_errors, json_schema_validation_errors
 
 
 def _override_config_for_cube_id(config: dict, cube_id: str) -> Optional[dict]:

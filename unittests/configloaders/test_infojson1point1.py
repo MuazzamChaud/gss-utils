@@ -1,5 +1,4 @@
 import pytest
-import pandas as pd
 from pathlib import Path
 from csvcubed.utils.iterables import first
 from csvcubed.models.cube import *
@@ -22,7 +21,7 @@ def test_units_loading():
     config_path = Path(info_json_1_1_test_cases_dir / "units.json")
     data_path = Path(info_json_1_1_test_cases_dir / "units.csv")
 
-    cube, _ = get_cube_from_info_json(   
+    cube, _, _ = get_cube_from_info_json(   
         config_path, data_path
     )
 
@@ -90,7 +89,7 @@ def test_measures_loading():
     config_path = Path(info_json_1_1_test_cases_dir / "measures.json")
     data_path = Path(info_json_1_1_test_cases_dir / "measures.csv")
 
-    cube, _ = get_cube_from_info_json(   
+    cube, _, _ = get_cube_from_info_json(   
         config_path, data_path
     )
 
@@ -147,7 +146,7 @@ def test_observation_value_loading():
     config_path = Path(info_json_1_1_test_cases_dir / "observations.json")
     data_path = Path(info_json_1_1_test_cases_dir / "observations.csv")
 
-    cube, _ = get_cube_from_info_json(   
+    cube, _, _ = get_cube_from_info_json(   
         config_path, data_path
     )
 
@@ -212,7 +211,7 @@ def test_dimension_loading():
     config_path = Path(info_json_1_1_test_cases_dir / "dimensions.json")
     data_path = Path(info_json_1_1_test_cases_dir / "dimensions.csv")
 
-    cube, _ = get_cube_from_info_json(   
+    cube, _, _ = get_cube_from_info_json(   
         config_path, data_path
     )
 
@@ -325,7 +324,7 @@ def test_attribute_loading():
     config_path = Path(info_json_1_1_test_cases_dir / "attributes.json")
     data_path = Path(info_json_1_1_test_cases_dir / "attributes.csv")
 
-    cube, _ = get_cube_from_info_json(   
+    cube, _, _ = get_cube_from_info_json(   
         config_path, data_path
     )
 
