@@ -18,7 +18,7 @@ from csvcubed.models.cube.qb import QbCube
 from csvcubed.models.cube.qb.catalog import CatalogMetadata
 from csvcubedmodels.dataclassbase import DataClassBase
 
-from gssutils.csvcubedintegration.configloaders.infojson import get_cube_from_config
+from gssutils.csvcubedintegration.configloaders.infojson import get_cube_from_info_json
 
 
 def build(
@@ -32,7 +32,7 @@ def build(
     print(f"{Style.DIM}CSV: {csv_path.absolute()}")
     print(f"{Style.DIM}info.json: {info_json.absolute()}")
 
-    cube, json_schema_validation_errors = get_cube_from_config(config_path=info_json, data_path=csv_path)
+    cube, json_schema_validation_errors = get_cube_from_info_json(info_json_path=info_json, data_path=csv_path)
 
     if catalog_metadata_json_file is not None:
         _override_catalog_metadata_state(catalog_metadata_json_file, cube)

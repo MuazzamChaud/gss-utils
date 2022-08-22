@@ -39,23 +39,23 @@ def get_schema_errors(info_json: Path) -> List[ValidationError]:
     return schema_errors
 
 
-def get_cube_from_config(
-    config_path: Path, data_path: Path, cube_id: Optional[str] = None
+def get_cube_from_info_json(
+    info_json_path: Path, data_path: Path, cube_id: Optional[str] = None
 ) -> Tuple[QbCube, List[ValidationError]]:
     """
     Generates a QbCube structure from an info.json input.
     :return: tuple of cube and json schema errors (if any)
     """
     
-    with open(config_path, "r") as f:
+    with open(info_json_path, "r") as f:
         config = json.load(f)
 
     dtype = datatypes.get_pandas_datatypes(data_path, config=config)
-    data, _ = read_csv(data_path, dtype=dtype)
+    data, errors = read_csv(data_path, dtype=dtype)
     
     info_json_schema_url = "https://raw.githubusercontent.com/GSS-Cogs/family-schemas/main/dataset-schema-1.1.0.json"
 
-    errors = validate_dict_against_schema_url(
+    errors += validate_dict_against_schema_url(
         value=config, schema_url=info_json_schema_url
     )
 
@@ -65,7 +65,7 @@ def get_cube_from_config(
     if config is None:
         raise Exception(f"Config not found for cube with id '{cube_id}'")
 
-    return _from_info_json_dict(config, data, config_path.parent.absolute()), errors
+    return _from_info_json_dict(config, data, info_json_path.parent.absolute()), errors
 
 
 def _override_config_for_cube_id(config: dict, cube_id: str) -> Optional[dict]:
