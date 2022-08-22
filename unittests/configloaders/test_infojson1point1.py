@@ -5,7 +5,7 @@ from csvcubed.utils.iterables import first
 from csvcubed.models.cube import *
 from csvcubeddevtools.helpers.file import get_test_cases_dir
 
-from gssutils.csvcubedintegration.configloaders.infojson import get_cube_from_config
+from gssutils.csvcubedintegration.configloaders.infojson import get_cube_from_info_json
 
 
 info_json_1_1_test_cases_dir = Path(
@@ -22,7 +22,7 @@ def test_units_loading():
     config_path = Path(info_json_1_1_test_cases_dir / "units.json")
     data_path = Path(info_json_1_1_test_cases_dir / "units.csv")
 
-    cube, _ = get_cube_from_config(   
+    cube, _ = get_cube_from_info_json(   
         config_path, data_path
     )
 
@@ -90,7 +90,7 @@ def test_measures_loading():
     config_path = Path(info_json_1_1_test_cases_dir / "measures.json")
     data_path = Path(info_json_1_1_test_cases_dir / "measures.csv")
 
-    cube, _ = get_cube_from_config(   
+    cube, _ = get_cube_from_info_json(   
         config_path, data_path
     )
 
@@ -147,7 +147,7 @@ def test_observation_value_loading():
     config_path = Path(info_json_1_1_test_cases_dir / "observations.json")
     data_path = Path(info_json_1_1_test_cases_dir / "observations.csv")
 
-    cube, _ = get_cube_from_config(   
+    cube, _ = get_cube_from_info_json(   
         config_path, data_path
     )
 
@@ -212,7 +212,7 @@ def test_dimension_loading():
     config_path = Path(info_json_1_1_test_cases_dir / "dimensions.json")
     data_path = Path(info_json_1_1_test_cases_dir / "dimensions.csv")
 
-    cube, _ = get_cube_from_config(   
+    cube, _ = get_cube_from_info_json(   
         config_path, data_path
     )
 
@@ -325,7 +325,7 @@ def test_attribute_loading():
     config_path = Path(info_json_1_1_test_cases_dir / "attributes.json")
     data_path = Path(info_json_1_1_test_cases_dir / "attributes.csv")
 
-    cube, _ = get_cube_from_config(   
+    cube, _ = get_cube_from_info_json(   
         config_path, data_path
     )
 
