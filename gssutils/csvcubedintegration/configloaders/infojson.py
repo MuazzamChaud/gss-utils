@@ -20,7 +20,7 @@ from csvcubed.utils.dict import get_from_dict_ensure_exists, get_with_func_or_no
 from csvcubed.inputs import pandas_input_to_columnar_str, PandasDataTypes
 from csvcubed.utils.pandas import read_csv
 from csvcubed.readers.cubeconfig.v1 import datatypes
-from jsonschema.exceptions import ValidationError as JsonSchemeValidationError
+from jsonschema.exceptions import ValidationError as JsonSchemaValidationError
 
 
 from gssutils.csvcubedintegration.configloaders.jsonschemavalidation import (
@@ -32,7 +32,7 @@ from gssutils.utils import pathify
 
 def get_cube_from_info_json(
     info_json_path: Path, data_path: Path, cube_id: Optional[str] = None
-) -> Tuple[QbCube, List[ValidationError], List[JsonSchemeValidationError]]:
+) -> Tuple[QbCube, List[ValidationError], List[JsonSchemaValidationError]]:
     """
     Generates a QbCube structure from an info.json input.
     :return: tuple of cube and json schema errors (if any)
