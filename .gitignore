@@ -11,3 +11,4 @@ codelists
 .vscode
 **/build
 *.egg
+recording.yml
