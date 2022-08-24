@@ -1,3 +1,5 @@
+from csvcubed.models.cube import QbCube
+from csvcubed.utils.qb.validation.cube import validate_qb_component_constraints
 from csvcubeddevtools.behaviour.temporarydirectory import get_context_temp_dir_path
 from behave import Step, When, Then
 from csvcubed.writers.qbwriter import QbWriter
@@ -24,6 +26,9 @@ def step_impl(context, some_json, some_csv):
 
 @Step("the CSVqb should pass all validations")
 def step_impl(context):
+    cube: QbCube = context.cube
+    errors = cube.validate()
+    context.validation_errors += validate_qb_component_constraints(context.cube)
     assert len(context.validation_errors) == 0, [e.message for e in context.validation_errors]
 
 
