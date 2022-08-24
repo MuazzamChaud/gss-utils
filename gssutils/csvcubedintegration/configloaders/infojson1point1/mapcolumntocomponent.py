@@ -16,13 +16,12 @@ import gssutils.csvcubedintegration.configloaders.infojson1point1.columnschema a
 
 
 def map_column_to_qb_component(
-    column_title: str, column: dict, data: PandasDataTypes, info_json_parent_dir: Path
+    column_title: str, schema_mapping: schema.SchemaBaseClass, data: PandasDataTypes, info_json_parent_dir: Path
 ) -> QbColumn:
     """
     Takes an info.json v1.1 column mapping and, if valid,
     returns a :obj:`~csvcubed.models.cube.qb.components.datastructuredefinition.QbDataStructureDefinition`.
     """
-    schema_mapping = _from_column_dict_to_schema_model(column_title, column)
 
     if isinstance(schema_mapping, schema.NewDimension):
         new_qb_dimension = schema_mapping.map_to_new_qb_dimension(
@@ -80,7 +79,7 @@ def map_column_to_qb_component(
         raise ValueError(f"Unmatched schema model type {type(schema_mapping)}")
 
 
-def _from_column_dict_to_schema_model(
+def from_column_dict_to_schema_model(
     column_title: str,
     column: dict,
 ) -> Union[

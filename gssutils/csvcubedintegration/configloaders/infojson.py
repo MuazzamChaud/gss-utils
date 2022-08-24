@@ -19,13 +19,13 @@ from csvcubed.utils.uri import csvw_column_name_safe, uri_safe
 from csvcubed.utils.dict import get_from_dict_ensure_exists, get_with_func_or_none
 from csvcubed.inputs import pandas_input_to_columnar_str, PandasDataTypes
 from csvcubed.utils.pandas import read_csv
-from csvcubed.readers.cubeconfig.v1 import datatypes
+from csvcubed.models.cube.qb.components.constants import ACCEPTED_DATATYPE_MAPPING
 from jsonschema.exceptions import ValidationError as JsonSchemaValidationError
-
 
 from gssutils.csvcubedintegration.configloaders.jsonschemavalidation import (
     validate_dict_against_schema_url,
 )
+import gssutils.csvcubedintegration.configloaders.infojson1point1.columnschema as schema
 import gssutils.csvcubedintegration.configloaders.infojson1point1.mapcolumntocomponent as v1point1
 from gssutils.utils import pathify
 
@@ -41,9 +41,6 @@ def get_cube_from_info_json(
     with open(info_json_path, "r") as f:
         config = json.load(f)
 
-    dtype = datatypes.get_pandas_datatypes(data_path, config=config)
-    data, validation_errors = read_csv(data_path, dtype=dtype)
-    
     info_json_schema_url = "https://raw.githubusercontent.com/GSS-Cogs/family-schemas/main/dataset-schema-1.1.0.json"
 
     json_schema_validation_errors = validate_dict_against_schema_url(
@@ -55,8 +52,9 @@ def get_cube_from_info_json(
 
     if config is None:
         raise Exception(f"Config not found for cube with id '{cube_id}'")
-
-    return _from_info_json_dict(config, data, info_json_path.parent.absolute()), validation_errors, json_schema_validation_errors
+ 
+    cube, validation_errors = _from_info_json_dict(config, data_path, info_json_path.parent.absolute())
+    return cube, validation_errors, json_schema_validation_errors
 
 
 def _override_config_for_cube_id(config: dict, cube_id: str) -> Optional[dict]:
@@ -83,16 +81,19 @@ def _override_config_for_cube_id(config: dict, cube_id: str) -> Optional[dict]:
 
 
 def _from_info_json_dict(
-    d: Dict, data: pd.DataFrame, info_json_parent_dir: Path
+    config: Dict, data_path: Path, info_json_parent_dir: Path
 ) -> QbCube:
-    metadata = _metadata_from_dict(d)
-    transform_section = d.get("transform", {})
-    columns = _columns_from_info_json(
-        transform_section.get("columns", []), data, info_json_parent_dir
+    metadata = _metadata_from_dict(config)
+    transform_section = config.get("transform", {})
+    columns, dtype_mapping = _columns_from_info_json(
+        transform_section.get("columns", []), data_path, info_json_parent_dir
     )
     uri_style = _uri_style_from_transform(transform_section)
 
-    return Cube(metadata, data, columns, uri_style)
+    data, validation_errors = read_csv(data_path, dtype=dtype_mapping)
+
+    return Cube(metadata, data, columns, uri_style), validation_errors
+
 
 def _uri_style_from_transform(transform_section):
     if "csvcubed_uri_style" in transform_section:
@@ -128,31 +129,35 @@ def _metadata_from_dict(config: dict) -> "CatalogMetadata":
 
 
 def _columns_from_info_json(
-    column_mappings: Dict[str, Any], data: pd.DataFrame, info_json_parent_dir: Path
-) -> List[CsvColumn]:
+    column_mappings: Dict[str, Any], data_path: Path, info_json_parent_dir: Path
+) -> Tuple[Dict[str, str], List[CsvColumn]]:
     defined_columns: List[CsvColumn] = []
+    dtype_mapping: Dict[str, str] = {}
+
+    data = pd.read_csv(data_path)
 
     column_titles_in_data: List[str] = [
         str(title) for title in data.columns  # type: ignore
     ]
+
     for col_title in column_titles_in_data:
         maybe_config = column_mappings.get(col_title)
-        defined_columns.append(
-            _get_column_for_metadata_config(
+        column_object, dtype_map = _get_column_for_metadata_config(
                 col_title, maybe_config, data[col_title], info_json_parent_dir
             )
-        )
+        defined_columns.append(column_object)
+        dtype_mapping[col_title] = dtype_map
 
     columns_missing_in_data = set(column_mappings.keys()) - set(column_titles_in_data)
     for col_title in columns_missing_in_data:
         config = column_mappings[col_title]
-        defined_columns.append(
-            _get_column_for_metadata_config(
+        column_object, dtype_map = _get_column_for_metadata_config(
                 col_title, config, pd.Series([]), info_json_parent_dir
             )
-        )
+        defined_columns.append(column_object)
+        dtype_mapping.update(dtype_map)
 
-    return defined_columns
+    return defined_columns, dtype_mapping
 
 
 def _get_column_for_metadata_config(
@@ -160,12 +165,32 @@ def _get_column_for_metadata_config(
     col_config: Optional[Union[dict, bool]],
     column_data: PandasDataTypes,
     info_json_parent_dir: Path,
-) -> CsvColumn:
+) -> Tuple[CsvColumn, str]:
+    """
+    Get the class representing a column from
+    """
     if isinstance(col_config, dict):
+
+        # Scenario 1: If we have a type, map the fields to a specfied schema
+        # and use this to find the QbColumn component and the pandas datatype
+        # for the column.
         if col_config.get("type") is not None:
-            return v1point1.map_column_to_qb_component(
-                column_name, col_config, column_data, info_json_parent_dir
+
+            schema_mapping = v1point1.from_column_dict_to_schema_model(column_name, col_config)
+            column = v1point1.map_column_to_qb_component(
+                column_name, schema_mapping, column_data, info_json_parent_dir
             )
+
+            if hasattr(schema_mapping, "data_type"):
+                dtype_str = schema_mapping["data_type"]
+            elif isinstance(schema_mapping, schema.ObservationValue):
+                dtype_str = "decimal"
+            else:
+                dtype_str = "string"
+
+            return column, ACCEPTED_DATATYPE_MAPPING[dtype_str]
+
+        # Scenario 2: No type is specified, we need to do it the hard way.
         csv_safe_column_name = csvw_column_name_safe(column_name)
 
         maybe_dimension_uri = col_config.get("dimension")
@@ -198,13 +223,13 @@ def _get_column_for_metadata_config(
                 measures = QbMultiMeasureDimension(
                     [ExistingQbMeasure(t) for t in defined_measure_types]
                 )
-                return QbColumn(column_name, measures, maybe_property_value_url)
+                return QbColumn(column_name, measures, maybe_property_value_url), ACCEPTED_DATATYPE_MAPPING["string"]
             else:
                 return QbColumn(
                     column_name,
                     ExistingQbDimension(maybe_dimension_uri),
                     maybe_property_value_url,
-                )
+                ), ACCEPTED_DATATYPE_MAPPING["string"]
         elif (
             maybe_parent_uri is not None
             or maybe_description is not None
@@ -235,7 +260,7 @@ def _get_column_for_metadata_config(
                 column_name,
                 new_dimension,
                 csv_column_value_url_template,
-            )
+            ), ACCEPTED_DATATYPE_MAPPING["string"]
         elif maybe_attribute_uri is not None and maybe_property_value_url is not None:
             if (
                 maybe_attribute_uri
@@ -253,7 +278,7 @@ def _get_column_for_metadata_config(
             else:
                 dsd_component = ExistingQbAttribute(maybe_attribute_uri)
 
-            return QbColumn(column_name, dsd_component, maybe_property_value_url)
+            return QbColumn(column_name, dsd_component, maybe_property_value_url), ACCEPTED_DATATYPE_MAPPING["string"]
         elif maybe_unit_uri is not None and maybe_measure_uri is not None:
             measure_component = ExistingQbMeasure(maybe_measure_uri)
             unit_component = ExistingQbUnit(maybe_unit_uri)
@@ -262,11 +287,12 @@ def _get_column_for_metadata_config(
                 unit=unit_component,
                 data_type=maybe_data_type or "decimal",
             )
-            return QbColumn(column_name, observation_value)
+
+            return QbColumn(column_name, observation_value), ACCEPTED_DATATYPE_MAPPING[maybe_data_type or "decimal"]
         elif maybe_data_type is not None:
             return QbColumn(
                 column_name, QbMultiMeasureObservationValue(maybe_data_type)
-            )
+            ), ACCEPTED_DATATYPE_MAPPING[maybe_data_type]
         else:
             raise Exception(f"Unmatched column definition: {col_config}")
     elif isinstance(col_config, bool) and col_config:
@@ -280,7 +306,7 @@ def _get_column_for_metadata_config(
         new_dimension = NewQbDimension.from_data(
             column_name, column_data, description=maybe_description
         )
-        return QbColumn(column_name, new_dimension)
+        return QbColumn(column_name, new_dimension), ACCEPTED_DATATYPE_MAPPING["string"]
 
 
 def _get_code_list(
