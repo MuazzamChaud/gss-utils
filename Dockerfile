@@ -27,6 +27,13 @@ RUN poetry export --format requirements.txt --output /requirements.txt --without
 RUN ${VENV_PIP} install --requirement /requirements.txt
 RUN ${VENV_PIP} install poetry
 
+# The install from requirements is cirumventing the pin to cacheControl 0.12.6 as it lacks
+# sufficiant dependency resolution.
+# unfortunetly the poetry install in the ENTRYPOINT tries to resolve but falls
+# on 0.12.11+ -> 0.12.6 as it cant uninstall 0.12.11 cleanly.
+# so we're directly uninstalling from the cache with pip to remove cause of failing uninstall. 
+RUN ${VENV_PIP} uninstall cachecontrol -y
+
 # Patch behave
 RUN patch -Nf -d "${VENV_PATH}/lib/python3.9/site-packages/behave/formatter" -p1 < /cucumber-format.patch
 
