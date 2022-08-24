@@ -155,7 +155,7 @@ def _columns_from_info_json(
                 col_title, config, pd.Series([]), info_json_parent_dir
             )
         defined_columns.append(column_object)
-        dtype_mapping.update(dtype_map)
+        dtype_mapping[col_title] = dtype_map
 
     return defined_columns, dtype_mapping
 
