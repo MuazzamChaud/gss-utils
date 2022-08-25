@@ -27,11 +27,12 @@ RUN poetry export --format requirements.txt --output /requirements.txt --without
 RUN ${VENV_PIP} install --requirement /requirements.txt
 RUN ${VENV_PIP} install poetry
 
-# The install from requirements is cirumventing the pin to cacheControl 0.12.6 as it lacks
-# sufficiant dependency resolution.
-# unfortunetly the poetry install in the ENTRYPOINT tries to resolve but falls
-# on 0.12.11+ -> 0.12.6 as it cant uninstall 0.12.11 cleanly.
-# so we're directly uninstalling from the cache with pip to remove cause of failing uninstall. 
+# The install from requirements.txt is cirumventing the pin to cacheControl 0.12.6 as it lacks
+# sufficiant dependency resolution (something somewhere is bumping us to 0.12.11).
+# Unfortunetly when the "poetry install" in the ENTRYPOINT tries to resolve this on Jenkins it errors
+# while attempting the downgrade of 0.12.11 -> 0.12.6.
+# As a work around we're directly uninstalling cachecontrol (0.12.11) here with the venv
+# pip - poetry in the ENTRYPOINT will then install the required version.
 RUN ${VENV_PIP} uninstall cachecontrol -y
 
 # Patch behave
