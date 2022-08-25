@@ -167,13 +167,17 @@ def _get_column_for_metadata_config(
     info_json_parent_dir: Path,
 ) -> Tuple[CsvColumn, str]:
     """
-    Get the class representing a column from
+    Using the dictionary representing a column (col_config), returns a Qb class representing
+    said column, along with the _pandas_ dtype appropriate to that column.
+
+    note: ACCEPTED_DATATYPE_MAPPING provides the mapping of the csvw spec
+    representation of a data type to the appropriate primitve pandas data type.
+    
+    for schema see:
+    https://raw.githubusercontent.com/GSS-Cogs/family-schemas/main/dataset-schema-1.1.0.json
     """
     if isinstance(col_config, dict):
 
-        # Scenario 1: If we have a type, map the fields to a specfied schema
-        # and use this to find the QbColumn component and the pandas datatype
-        # for the column.
         if col_config.get("type") is not None:
 
             schema_mapping = v1point1.from_column_dict_to_schema_model(column_name, col_config)
@@ -190,7 +194,6 @@ def _get_column_for_metadata_config(
 
             return column, ACCEPTED_DATATYPE_MAPPING[dtype_str]
 
-        # Scenario 2: No type is specified, we need to do it the hard way.
         csv_safe_column_name = csvw_column_name_safe(column_name)
 
         maybe_dimension_uri = col_config.get("dimension")
