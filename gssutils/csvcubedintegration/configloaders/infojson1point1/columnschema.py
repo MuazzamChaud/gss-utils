@@ -284,7 +284,7 @@ class ExistingUnits(SchemaBaseClass):
     value: str
 
     def map_to_qb_multi_units(
-        self, data: PandasDataTypes, column_title: str
+        self, column_title: str, data: PandasDataTypes
     ) -> QbMultiUnits:
         return QbMultiUnits.existing_units_from_data(
             data, csvw_column_name_safe(column_title), self.value

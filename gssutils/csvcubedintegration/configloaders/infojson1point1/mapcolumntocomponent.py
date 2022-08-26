@@ -105,26 +105,26 @@ def from_column_dict_to_schema_model(
         raise ValueError("Type of column not specified.")
     elif column_type == "dimension":
         if schema.ExistingDimension.dict_fields_match_class(column_without_type):
-            return schema.ExistingDimension.from_dict(column)
+            return schema.ExistingDimension
         elif schema.NewDimension.dict_fields_match_class(column_without_type):
-            return schema.NewDimension.from_dict(column)
+            return schema.NewDimension
     elif column_type == "attribute":
         if schema.ExistingAttribute.dict_fields_match_class(column_without_type):
-            return schema.ExistingAttribute.from_dict(column)
+            return schema.ExistingAttribute
         elif schema.NewAttribute.dict_fields_match_class(column_without_type):
-            return schema.NewAttribute.from_dict(column)
+            return schema.NewAttribute
     elif column_type == "units":
         if schema.ExistingUnits.dict_fields_match_class(column_without_type):
-            return schema.ExistingUnits.from_dict(column)
+            return schema.ExistingUnits
         elif schema.NewUnits.dict_fields_match_class(column_without_type):
-            return schema.NewUnits.from_dict(column)
+            return schema.NewUnits
     elif column_type == "measures":
         if schema.ExistingMeasures.dict_fields_match_class(column_without_type):
-            return schema.ExistingMeasures.from_dict(column)
+            return schema.ExistingMeasures
         elif schema.NewMeasures.dict_fields_match_class(column_without_type):
-            return schema.NewMeasures.from_dict(column)
+            return schema.NewMeasures
     elif column_type == "observations":
-        return schema.ObservationValue.from_dict(column)
+        return schema.ObservationValue
 
     raise ValueError(
         f"Column '{column_title}' with type '{column_type}' could not be understood."
