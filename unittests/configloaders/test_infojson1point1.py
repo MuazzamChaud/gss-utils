@@ -24,7 +24,6 @@ def test_units_loading():
     cube, _, _ = get_cube_from_info_json(   
         config_path, data_path
     )
-
     existing_units = _get_column_definition(cube, "Existing Units")
     new_units = _get_column_definition(cube, "New Units")
     new_units_2 = _get_column_definition(cube, "New Units 2")
@@ -33,13 +32,15 @@ def test_units_loading():
     assert existing_units is not None
     assert isinstance(existing_units.structural_definition, QbMultiUnits)
     assert len(existing_units.structural_definition.units) == 1
+
     unit = existing_units.structural_definition.units[0]
     assert isinstance(unit, ExistingQbUnit)
+
     assert unit.unit_uri == "http://example.com/units/some-existing-unit"
     assert (
         existing_units.csv_column_uri_template
         == "http://example.com/units/{+existing_units}"
-    )
+    ), existing_units
 
     assert new_units is not None
     assert isinstance(new_units.structural_definition, QbMultiUnits)

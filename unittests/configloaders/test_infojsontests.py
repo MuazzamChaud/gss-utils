@@ -36,7 +36,7 @@ def test_csv_cols_assumed_dimensions():
     )
 
     matching_columns = [
-        c for c in cube.columns if c.csv_column_title == "Undefined Column"
+        c for c in cube.columns if hasattr(c, "csv_column_title") and c.csv_column_title == "Undefined Column"
     ]
     assert len(matching_columns) == 1
     undefined_column_assumed_definition: CsvColumn = matching_columns[0]

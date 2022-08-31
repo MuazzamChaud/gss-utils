@@ -60,7 +60,7 @@ def map_column_to_qb_component(
     elif isinstance(schema_mapping, schema.ExistingUnits):
         return QbColumn(
             column_title,
-            schema_mapping.map_to_qb_multi_units(data, column_title),
+            schema_mapping.map_to_qb_multi_units(column_title, data),
             csv_column_uri_template=schema_mapping.value,
         )
     elif isinstance(schema_mapping, schema.NewMeasures):
@@ -76,7 +76,7 @@ def map_column_to_qb_component(
     elif isinstance(schema_mapping, schema.ObservationValue):
         return QbColumn(column_title, schema_mapping.map_to_qb_observation())
     else:
-        raise ValueError(f"Unmatched schema model type {type(schema_mapping)}")
+        raise ValueError(f"Unmatched schema model type {schema_mapping}")
 
 
 def from_column_dict_to_schema_model(

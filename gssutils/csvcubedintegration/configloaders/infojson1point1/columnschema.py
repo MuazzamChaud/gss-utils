@@ -265,7 +265,8 @@ class NewUnits(SchemaBaseClass):
     new: Union[bool, List[NewUnit]] = True
 
     def map_to_qb_multi_units(self, data: PandasDataTypes) -> QbMultiUnits:
-        if isinstance(self.new, bool) and self.new:
+
+        if self.new is True:
             return QbMultiUnits.new_units_from_data(data)
         elif isinstance(self.new, list):
             units = []
