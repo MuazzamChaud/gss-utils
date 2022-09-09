@@ -7,6 +7,7 @@ Map info.json V1.1 definitions to QB column components
 import copy
 from typing import Union
 from pathlib import Path
+from typing import Type
 
 from csvcubed.models.cube import CompositeQbCodeList
 from csvcubed.models.cube.qb.columns import QbColumn
@@ -83,15 +84,15 @@ def from_column_dict_to_schema_model(
     column_title: str,
     column: dict,
 ) -> Union[
-    schema.NewDimension,
-    schema.ExistingDimension,
-    schema.NewAttribute,
-    schema.ExistingAttribute,
-    schema.NewUnits,
-    schema.ExistingUnits,
-    schema.NewMeasures,
-    schema.ExistingMeasures,
-    schema.ObservationValue,
+    Type[schema.NewDimension],
+    Type[schema.ExistingDimension],
+    Type[schema.NewAttribute],
+    Type[schema.ExistingAttribute],
+    Type[schema.NewUnits],
+    Type[schema.ExistingUnits],
+    Type[schema.NewMeasures],
+    Type[schema.ExistingMeasures],
+    Type[schema.ObservationValue],
 ]:
     """
     N.B. when using the :method:`dict_fields_match_class` method, we need to ensure that we check for types with

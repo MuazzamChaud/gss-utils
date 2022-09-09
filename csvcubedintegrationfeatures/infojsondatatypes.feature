@@ -84,7 +84,7 @@ Feature: Test that any specified datatypes are correctly persisted
     And the RDF should contain
     """
     @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-    <file:/tmp/datatypes-fixture-dataset.csv#obs/foo,bar,baz@count> <file:/tmp/datatypes-fixture-dataset.csv#attribute/anyuri-attribute> "http://www.foo.com"^^xsd:anyURI ;
+    <file:/tmp/datatypes-fixture-dataset.csv#obs/00,01,02@count> <file:/tmp/datatypes-fixture-dataset.csv#attribute/anyuri-attribute> "http://www.foo.com"^^xsd:anyURI ;
       <file:/tmp/datatypes-fixture-dataset.csv#attribute/boolean-attribute> true ;
       <file:/tmp/datatypes-fixture-dataset.csv#attribute/date-attribute> "2019-09-07"^^xsd:date ;
       <file:/tmp/datatypes-fixture-dataset.csv#attribute/datetime-attribute> "2019-09-07T15:50:00"^^xsd:dateTime ;

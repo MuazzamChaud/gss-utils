@@ -4,9 +4,12 @@ Models
 
 info.json V1.1 column mapping models.
 """
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import List, Union, Optional, TypeVar
 from pathlib import Path
+from typing import Dict, Type
 
 import uritemplate
 from csvcubed.models.cube import (
@@ -18,7 +21,6 @@ from csvcubed.models.cube import (
     NewQbCodeList,
 )
 from csvcubedmodels.dataclassbase import DataClassBase
-
 from csvcubed.inputs import pandas_input_to_columnar_optional_str
 from csvcubed.models.cube.qb.components import (
     NewQbDimension,
@@ -41,13 +43,14 @@ from csvcubed.models.cube.qb.components import (
 from csvcubed.inputs import PandasDataTypes
 from csvcubed.utils.uri import looks_like_uri, csvw_column_name_safe
 
+import gssutils.csvcubedintegration.configloaders.infojson1point1.mapcolumntocomponent as v1point1
+
 T = TypeVar("T", bound=object)
 
 
 @dataclass
 class SchemaBaseClass(DataClassBase):
     ...
-
 
 @dataclass
 class NewDimensionProperty(SchemaBaseClass):
@@ -420,3 +423,114 @@ def _get_new_attribute_values(
         )
 
     return []
+
+
+@dataclass
+class InfoForColumn:
+    """
+    Convenience class to make the tracking and construction
+    of QbColumn objects easier to work with and understand.
+    """
+    name: str
+    config: dict
+    schema_type: Optional[Union[Type[SchemaBaseClass], Dict]] = None
+
+    @property
+    def maybe_dimension_uri(self):
+        return self.config.get("dimension")
+
+    @property
+    def maybe_property_value_url(self):
+        return self.config.get("value")
+        
+    @property
+    def maybe_parent_uri(self):
+        return self.config.get("parent")
+        
+    @property
+    def maybe_description(self):
+        return self.config.get("description")
+        
+    @property
+    def maybe_label(self):
+        return self.config.get("label")
+        
+    @property
+    def maybe_attribute_uri(self):
+        return self.config.get("attribute")
+        
+    @property
+    def maybe_unit_uri(self):
+        return self.config.get("unit")
+       
+    @property
+    def maybe_measure_uri(self):
+        return self.config.get("measure")
+        
+    @property
+    def maybe_data_type(self):
+        return self.config.get("datatype")
+    
+    def instantiate_schema(self) -> SchemaBaseClass:
+        """
+        Instantiate and return the known schema with
+        the known mapping.
+        """
+        return self.schema_type.from_dict(self.config)
+
+    def with_column_schema(self) -> InfoForColumn:
+        """
+        Returns copy of self but with the schema_type property
+        populated.
+        """
+        if isinstance(self.config, dict):
+            if self.config.get("type") is not None:
+                self.schema_type = v1point1.from_column_dict_to_schema_model(self.name, self.config)
+                return self
+
+            if self.maybe_dimension_uri is not None and self.maybe_property_value_url is not None:
+                if self.maybe_dimension_uri == "http://purl.org/linked-data/cube#measureType":
+                    self.schema_type =  NewMeasures
+                    return self
+
+                self.schema_type =  ExistingDimension
+                return self
+
+            elif (
+                self.maybe_parent_uri is not None
+                or self.maybe_description is not None
+                or self.maybe_label is not None
+            ):
+                self.schema_type = NewDimension
+                return self
+
+            elif self.maybe_attribute_uri is not None and self.maybe_property_value_url is not None:
+                if (
+                    self.maybe_attribute_uri
+                    == "http://purl.org/linked-data/sdmx/2009/attribute#unitMeasure"
+                ):
+                    self.schema_type = ExistingUnits
+                    return self
+
+                self.schema_type = ExistingAttribute
+                return self
+
+            elif self.maybe_unit_uri is not None and self.maybe_measure_uri is not None:
+                self.schema_type = ObservationValue
+                return self
+
+            elif self.maybe_data_type is not None:
+                self.schema_type = ObservationValue
+                return self
+
+            else:
+                raise Exception(f"Could not identify column schema for: {self.config}")
+
+        elif isinstance(self.config, bool) and self.config:
+            self.schema_type = self.config
+            return self
+
+        else:
+            # If not a known/expected type/value (or is a string), treat it as a dimension.
+            self.schema_type = NewDimension
+            return self

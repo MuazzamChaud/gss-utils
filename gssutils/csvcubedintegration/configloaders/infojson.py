@@ -5,11 +5,10 @@ Info.json Loader
 A loader for the info.json file format.
 """
 import datetime
-from typing import Dict, List, Any, Tuple
+from typing import Dict, List, Tuple
 from pathlib import Path
 import json
 import copy
-from unittest.mock import NonCallableMagicMock
 import pandas as pd
 import uritemplate
 from dateutil import parser
@@ -121,47 +120,50 @@ def _from_info_json_dict(
     all_columns = column_titles_in_data + columns_titles_not_in_data
 
     # step 2
-    column_schemas = {}
+    info_for_columns = []
     for column_title in all_columns:
         maybe_config = column_mappings.get(column_title)
-        column_schemas[column_title] = _get_column_schema(column_title, maybe_config)
+        info_for_columns.append(
+            schema.InfoForColumn(
+                column_title, maybe_config
+            ).with_column_schema()
+        )
 
-    # raise Exception(column_schemas)
-    
     # step 3
-    dtype_mapping = _get_dtypes_from_schemas(column_schemas)
+    dtype_mapping = _get_dtypes_from_schemas(info_for_columns)
 
     # step 4
     data, validation_errors = read_csv(data_path, dtype=dtype_mapping)
 
     # step 5
-    qb_columns = get_qb_columns(column_mappings, column_schemas, data, info_json_parent_dir)
+    qb_columns = get_qb_columns(info_for_columns, data, info_json_parent_dir)
 
     uri_style = _uri_style_from_transform(transform_section)
     return Cube(metadata, data, qb_columns, uri_style), validation_errors
 
 
-def _get_dtypes_from_schemas(column_schemas: Dict[str, schema.SchemaBaseClass]) -> Dict[str, str]:
+def _get_dtypes_from_schemas(info_for_columns: List[schema.InfoForColumn]) -> Dict[str, str]:
     """
-    Given a dict of: {<column titls>:<column dict from info_json>}
-
     Return a mapping of csvw spec datatypes to pandas primitive datatypes.
     The mapping is provided by ACCEPTED_DATATYPE_MAPPING from csvcubed itself.
     """
 
     dtypes = {}
-    for column_title, column_schema in column_schemas.items():
+    for column_info in info_for_columns:
         
-        if hasattr(column_schema, "data_type"):
-            dtype_str = column_schema["data_type"]
-        elif isinstance(column_schema, schema.ObservationValue):
+        if column_info.schema_type is schema.ObservationValue:
             dtype_str = "decimal"
+            if column_info.config:
+                if "data_type" in column_info.config:
+                    dtype_str = column_info.config["data_type"]
+        elif column_info.config and "data_type" in column_info.config:
+            dtype_str = column_info.config["data_type"]
         else:
             dtype_str = "string"
 
         # Note: always use the map even where we're mapping from say
         # "string" to "string", the mapping can potentially change.
-        dtypes[column_title] = ACCEPTED_DATATYPE_MAPPING[dtype_str]
+        dtypes[column_info.name] = ACCEPTED_DATATYPE_MAPPING[dtype_str]
 
     return dtypes
 
@@ -198,112 +200,35 @@ def _metadata_from_dict(config: dict) -> "CatalogMetadata":
         uri_safe_identifier_override=get_from_dict_ensure_exists(config, "id"),
     )
 
-
-def _get_column_schema(
-    column_name: str,
-    col_config: Optional[Union[dict, bool]],
-) -> schema.SchemaBaseClass:
-    """
-    Using the fields in question, get the column schema
-    """
-    if isinstance(col_config, dict):
-        if col_config.get("type") is not None:
-            return v1point1.from_column_dict_to_schema_model(column_name, col_config)
-
-        maybe_dimension_uri = col_config.get("dimension")
-        maybe_property_value_url = col_config.get("value")
-        maybe_parent_uri = col_config.get("parent")
-        maybe_description = col_config.get("description")
-        maybe_label = col_config.get("label")
-        maybe_attribute_uri = col_config.get("attribute")
-        maybe_unit_uri = col_config.get("unit")
-        maybe_measure_uri = col_config.get("measure")
-        maybe_data_type = col_config.get("datatype")
-
-        if maybe_dimension_uri is not None and maybe_property_value_url is not None:
-            if maybe_dimension_uri == "http://purl.org/linked-data/cube#measureType":
-                return schema.NewMeasures
-            return schema.ExistingDimension
-        elif (
-            maybe_parent_uri is not None
-            or maybe_description is not None
-            or maybe_label is not None
-        ):
-            return schema.NewDimension
-        elif maybe_attribute_uri is not None and maybe_property_value_url is not None:
-            if (
-                maybe_attribute_uri
-                == "http://purl.org/linked-data/sdmx/2009/attribute#unitMeasure"
-            ):
-                return schema.ExistingUnits
-            return schema.ExistingAttribute
-
-        elif maybe_unit_uri is not None and maybe_measure_uri is not None:
-            return schema.ObservationValue
-        elif maybe_data_type is not None:
-            return schema.ObservationValue
-        else:
-            raise Exception(f"Could not identify column schema for: {col_config}")
-
-    elif isinstance(col_config, bool) and col_config:
-        return col_config
-    else:
-        # If not a known/expected type/value (or is a string), treat it as a dimension.
-        return schema.NewDimension
-
-
 def get_qb_columns(
-    column_mappings: Dict,
-    column_schemas: Dict[str, schema.SchemaBaseClass], data: pd.DataFrame, info_json_parent_dir: Path
+    info_for_columns: List[schema.InfoForColumn], data: pd.DataFrame, info_json_parent_dir: Path
 ) -> List[CsvColumn]:
     """
     Use the schema and column config to create QbColumn classes representing all
     the columns (a) defined and (b) in the csv.
-
-    --- Variables ---
-
-    column_mappings: the sub dict from the info json defining a column,
-    example of a single key:value pair:
-    "Dim-0": {
-                "type": "dimension",
-                "new": {
-                    "label": "Dim-0 Label",
-                    "codelist": true
-                }
-            },
-
-    column_schema: is an UNINSTANTIATED child of SchemaBaseClass as provided
-    by _get_column_schema
-    
-    data: pandas dataframe, for some QbComponents (some attributes and dimensions
-    requiring codelists) we need the pd.Series of the column.
-
-    info_json_parent_dir: required so we know where to putput any local codelists
-    that are generated.
     """
     qb_columns: List[QbColumn] = []
     
-    for column_name, column_schema in column_schemas.items():
-        col_config = column_mappings.get(column_name)
+    for column_info in info_for_columns:
 
         # Use data if the column has a data representation in the csv
-        if column_name in data.columns.values:
-            column_data: pd.Series = data[column_name]
+        if column_info.name in data.columns.values:
+            column_data: pd.Series = data[column_info.name]
         else:
             column_data: pd.Series = pd.Series([])
 
         # Scenario 1: QbColumn by convention
-        if col_config is None and column_schema is schema.NewDimension:
+        if column_info.config is None and column_info.schema_type is schema.NewDimension:
             qb_columns.append(QbColumn(
-                column_name,
-                NewQbDimension.from_data(column_name, column_data))
+                column_info.name,
+                NewQbDimension.from_data(column_info.name, column_data))
             )
             continue
 
         # Scenario 2: QbColumn is explictly declared by type
-        if col_config.get("type") is not None:
+        if column_info.config.get("type") is not None:
             qb_column = v1point1.map_column_to_qb_component(
-                column_name, column_schema.from_dict(col_config),
+                column_info.name, column_info.instantiate_schema(),
                 column_data, info_json_parent_dir
             )
 
@@ -313,147 +238,137 @@ def get_qb_columns(
         # Scenario 3: neither of the above, legacy approach so
         # we apply some conditionals to instantiate with required
         # arguments.
-        csv_safe_column_name = csvw_column_name_safe(column_name)
+        csv_safe_column_name = csvw_column_name_safe(column_info.column_name)
 
-        maybe_dimension_uri = col_config.get("dimension")
-        maybe_property_value_url = col_config.get("value")
-        maybe_parent_uri = col_config.get("parent")
-        maybe_description = col_config.get("description")
-        maybe_label = col_config.get("label")
-        maybe_attribute_uri = col_config.get("attribute")
-        maybe_unit_uri = col_config.get("unit")
-        maybe_measure_uri = col_config.get("measure")
-        maybe_data_type = col_config.get("datatype")
-
-        if column_schema is schema.NewMeasures:
-            defined_measure_types: List[str] = col_config.get("types", [])
-            if maybe_property_value_url is not None:
+        if column_info.schema_type is schema.NewMeasures:
+            defined_measure_types: List[str] = column_info.config.get("types", [])
+            if column_info.maybe_property_value_url is not None:
                 defined_measure_types = [
                     uritemplate.expand(
-                        maybe_property_value_url, {csv_safe_column_name: d}
+                        column_info.maybe_property_value_url, {csv_safe_column_name: d}
                     )
                     for d in defined_measure_types
                 ]
 
             if len(defined_measure_types) == 0:
                 raise Exception(
-                    f"Property 'types' was not defined in measure types column '{column_name} with config {col_config}'."
+                    f"Property 'types' was not defined in measure types column '{column_info.name} with config {column_info.config}'."
                 )
 
             measures = QbMultiMeasureDimension(
                 [ExistingQbMeasure(t) for t in defined_measure_types]
             )
-            qb_columns.append(QbColumn(column_name, measures, maybe_property_value_url))
+            qb_columns.append(QbColumn(column_info.name, measures, column_info.maybe_property_value_url))
 
-        elif column_schema is schema.ExistingDimension:
+        elif column_info.schema_type is schema.ExistingDimension:
             qb_columns.append(QbColumn(
-                    column_name,
-                    ExistingQbDimension(maybe_dimension_uri),
-                    maybe_property_value_url,
+                    column_info.name,
+                    ExistingQbDimension(column_info.maybe_dimension_uri),
+                    column_info.maybe_property_value_url,
                 ))
 
-        elif column_schema is schema.NewDimension and any([
-            maybe_parent_uri is not None,
-            maybe_description is not None,
-            maybe_label is not None]):
+        elif column_info.schema_type is schema.NewDimension and any([
+            column_info.maybe_parent_uri is not None,
+            column_info.maybe_description is not None,
+            column_info.maybe_label is not None]):
 
-            label: str = column_name if maybe_label is None else maybe_label
+            label: str = column_info.name if column_info.maybe_label is None else column_info.maybe_label
 
             code_list = _get_code_list(
                 label,
-                col_config.get("codelist"),
+                column_info.config.get("codelist"),
                 info_json_parent_dir,
-                maybe_parent_uri,
+                column_info.maybe_parent_uri,
                 column_data,
-                maybe_property_value_url,
+                column_info.maybe_property_value_url,
             )
             new_dimension = NewQbDimension(
                 label,
                 description=maybe_description,
-                parent_dimension_uri=maybe_parent_uri,
-                source_uri=col_config.get("source"),
+                parent_dimension_uri=column_info.maybe_parent_uri,
+                source_uri=column_info.config.get("source"),
                 code_list=code_list,
             )
             csv_column_value_url_template = (
                 None
                 if isinstance(code_list, CompositeQbCodeList)
-                else maybe_property_value_url
+                else column_info.maybe_property_value_url
             )
             qb_columns.append(QbColumn(
-                column_name,
+                column_info.name,
                 new_dimension,
                 csv_column_value_url_template,
             ))
 
-        elif column_schema is schema.ExistingUnits:
+        elif column_info.schema_type is schema.ExistingUnits:
             distinct_unit_uris = [
                     uritemplate.expand(
-                        maybe_property_value_url, {csv_safe_column_name: u}
+                        column_info.maybe_property_value_url, {csv_safe_column_name: u}
                     )
                     for u in set(pandas_input_to_columnar_str(column_data))
                 ]
             dsd_component = QbMultiUnits(
                     [ExistingQbUnit(u) for u in distinct_unit_uris]
                 )
-            qb_columns.append(QbColumn(column_name, dsd_component, maybe_property_value_url))
+            qb_columns.append(QbColumn(column_info.name, dsd_component, column_info.maybe_property_value_url))
 
-        elif column_schema is schema.NewUnits:
-            multi_unit = schema.NewUnits.from_dict(col_config).map_to_qb_multi_units(column_data)
-            qb_columns.append(QbColumn(column_name, multi_unit, maybe_property_value_url))
+        elif column_info.schema_type is schema.NewUnits:
+            multi_unit = schema.NewUnits.from_dict(column_info.config).map_to_qb_multi_units(column_data)
+            qb_columns.append(QbColumn(column_info.name, multi_unit, column_info.maybe_property_value_url))
 
-        elif column_schema is schema.ExistingAttribute:
+        elif column_info.schema_type is schema.ExistingAttribute:
             qb_columns.append(QbColumn(
-                column_name,
-                ExistingQbAttribute(maybe_attribute_uri),
-                maybe_property_value_url)
+                column_info.name,
+                ExistingQbAttribute(column_info.maybe_attribute_uri),
+                column_info.maybe_property_value_url)
                 )
 
         # schema.ObservationValue with a single measure
         elif all([
-            column_schema is schema.ObservationValue,
-            maybe_unit_uri is not None,
-            maybe_measure_uri is not None
+            column_info.schema_type is schema.ObservationValue,
+            column_info.maybe_unit_uri is not None,
+            column_info.maybe_measure_uri is not None
             ]):
-            measure_component = ExistingQbMeasure(maybe_measure_uri)
-            unit_component = ExistingQbUnit(maybe_unit_uri)
+            measure_component = ExistingQbMeasure(column_info.maybe_measure_uri)
+            unit_component = ExistingQbUnit(column_info.maybe_unit_uri)
             observation_value = QbSingleMeasureObservationValue(
                 measure=measure_component,
                 unit=unit_component,
-                data_type=maybe_data_type or "decimal",
+                data_type=column_info.maybe_data_type or "decimal",
             )
-            qb_columns.append(QbColumn(column_name, observation_value))
+            qb_columns.append(QbColumn(column_info.name, observation_value))
 
         # schema.ObservationValue with multi measures
         elif all([
-            column_schema is schema.ObservationValue,
-            maybe_data_type is not None]):
+            column_info.schema_type is schema.ObservationValue,
+            column_info.maybe_data_type is not None]):
                 qb_columns.append(QbColumn(
-                    column_name, QbMultiMeasureObservationValue(maybe_data_type)
+                    column_info.name, QbMultiMeasureObservationValue(column_info.maybe_data_type)
                 ))
 
-        elif column_schema is  bool and col_config:
+        elif column_info.schema_type is  bool and column_info.config:
             qb_columns.append(QbColumn(
-                column_name, SuppressedCsvColumn(column_name)
+                column_info.name, SuppressedCsvColumn(column_info.name)
             ))
 
-        elif column_schema is schema.NewDimension:
+        elif column_info.schema_type is schema.NewDimension:
             maybe_description: Optional[str] = None
-            if isinstance(col_config, str):
-                maybe_description = col_config
+            if isinstance(column_info.config, str):
+                maybe_description = column_info.config
 
-            label: str = column_name if maybe_label is None else maybe_label
+            label: str = column_info.name if column_info.maybe_label is None else column_info.maybe_label
             new_dimension = NewQbDimension.from_data(
                 label, column_data, description=maybe_description
             )
-            qb_columns.append(QbColumn(column_name, new_dimension))
+            qb_columns.append(QbColumn(column_info.name, new_dimension))
 
-        elif column_schema is schema.NewAttribute:
+        elif column_info.schema_type is schema.NewAttribute:
             qb_columns.append(NewQbAttribute(
-                label=column_name if maybe_label is None else maybe_label,
+                label=column_info.name if column_info.maybe_label is None else column_info.maybe_label,
             ))
 
         else:
-            raise Exception(f'Unable to create QbColumn with "{column_name}" : {column_schema} : {col_config}')
+            raise Exception(f'Unable to create QbColumn with "{column_info.name}" : {column_info.schema_type} : {column_info.config}')
 
     return qb_columns
 
