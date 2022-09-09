@@ -88,12 +88,12 @@ def _from_info_json_dict(
     we need to:
 
     1.) Get the column titles only from the csv
-    2.) Use the title and column config (sub dict from info json "columns" field)
-        to identify the appropriate column schema.
-    3.) Use the column schemas to identify appropriate data types for 
-        reading in the data.
-    4.) Read in the data using those datatypes
-    5.) Use the (correctly type read) data & schema & column config to create the 
+    2.) Decide the schema for the given column.
+    3.) Use the column schemas to identify appropriate
+        data types for reading in the data.
+    4.) Read _all_ in the data using those datatypes
+    5.) Use the (correctly type read) data & schema & column config (held for 
+        convenienceto in schema.InfoForColumn objects) to create the 
         QbColumn objects that inform the QbCube.
 
     The ordering is critical, as 5 USES the data, said data must
