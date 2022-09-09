@@ -284,7 +284,7 @@ def get_qb_columns(
             )
             new_dimension = NewQbDimension(
                 label,
-                description=maybe_description,
+                description=column_info.maybe_description,
                 parent_dimension_uri=column_info.maybe_parent_uri,
                 source_uri=column_info.config.get("source"),
                 code_list=code_list,
