@@ -238,7 +238,7 @@ def get_qb_columns(
         # Scenario 3: neither of the above, legacy approach so
         # we apply some conditionals to instantiate with required
         # arguments.
-        csv_safe_column_name = csvw_column_name_safe(column_info.column_name)
+        csv_safe_column_name = csvw_column_name_safe(column_info.name)
 
         if column_info.schema_type is schema.NewMeasures:
             defined_measure_types: List[str] = column_info.config.get("types", [])
