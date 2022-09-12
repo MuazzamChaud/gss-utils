@@ -6,7 +6,7 @@ info.json V1.1 column mapping models.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Union, Optional, TypeVar
 from pathlib import Path
 from typing import Dict, Type
@@ -431,9 +431,56 @@ class InfoForColumn:
     Convenience class to make the tracking and construction
     of QbColumn objects easier to work with and understand.
     """
-    name: str
+    title: str
     config: dict
-    schema_type: Optional[Union[Type[SchemaBaseClass], Dict]] = None
+    schema_type: Union[Type[SchemaBaseClass], Dict, None] = field(init=False)
+
+    def __post_init__(self):
+        """
+        Populates the schema_type property
+        """
+        if isinstance(self.config, dict):
+            if self.config.get("type") is not None:
+                self.schema_type = v1point1.from_column_dict_to_schema_model(self.title, self.config)
+
+            elif self.maybe_dimension_uri is not None and self.maybe_property_value_url is not None:
+                if self.maybe_dimension_uri == "http://purl.org/linked-data/cube#measureType":
+                    self.schema_type =  NewMeasures
+                else:
+                    self.schema_type =  ExistingDimension
+
+            elif (
+                self.maybe_parent_uri is not None
+                or self.maybe_description is not None
+                or self.maybe_label is not None
+            ):
+                self.schema_type = NewDimension
+
+            elif self.maybe_attribute_uri is not None and self.maybe_property_value_url is not None:
+                if (
+                    self.maybe_attribute_uri
+                    == "http://purl.org/linked-data/sdmx/2009/attribute#unitMeasure"
+                ):
+                    self.schema_type = ExistingUnits
+                else:
+                    self.schema_type = ExistingAttribute
+
+            elif self.maybe_unit_uri is not None and self.maybe_measure_uri is not None:
+                self.schema_type = ObservationValue
+
+            elif self.maybe_data_type is not None:
+                self.schema_type = ObservationValue
+
+            else:
+                raise Exception(f"Could not identify column schema for: {self.config}")
+
+        elif isinstance(self.config, bool) and self.config:
+            self.schema_type = self.config
+
+        else:
+            # If not a known/expected type/value (or is a string), treat it as a dimension.
+            self.schema_type = NewDimension
+
 
     @property
     def maybe_dimension_uri(self):
@@ -477,60 +524,3 @@ class InfoForColumn:
         the known mapping.
         """
         return self.schema_type.from_dict(self.config)
-
-    def with_column_schema(self) -> InfoForColumn:
-        """
-        Returns copy of self but with the schema_type property
-        populated.
-        """
-        if isinstance(self.config, dict):
-            if self.config.get("type") is not None:
-                self.schema_type = v1point1.from_column_dict_to_schema_model(self.name, self.config)
-                return self
-
-            if self.maybe_dimension_uri is not None and self.maybe_property_value_url is not None:
-                if self.maybe_dimension_uri == "http://purl.org/linked-data/cube#measureType":
-                    self.schema_type =  NewMeasures
-                    return self
-
-                self.schema_type =  ExistingDimension
-                return self
-
-            elif (
-                self.maybe_parent_uri is not None
-                or self.maybe_description is not None
-                or self.maybe_label is not None
-            ):
-                self.schema_type = NewDimension
-                return self
-
-            elif self.maybe_attribute_uri is not None and self.maybe_property_value_url is not None:
-                if (
-                    self.maybe_attribute_uri
-                    == "http://purl.org/linked-data/sdmx/2009/attribute#unitMeasure"
-                ):
-                    self.schema_type = ExistingUnits
-                    return self
-
-                self.schema_type = ExistingAttribute
-                return self
-
-            elif self.maybe_unit_uri is not None and self.maybe_measure_uri is not None:
-                self.schema_type = ObservationValue
-                return self
-
-            elif self.maybe_data_type is not None:
-                self.schema_type = ObservationValue
-                return self
-
-            else:
-                raise Exception(f"Could not identify column schema for: {self.config}")
-
-        elif isinstance(self.config, bool) and self.config:
-            self.schema_type = self.config
-            return self
-
-        else:
-            # If not a known/expected type/value (or is a string), treat it as a dimension.
-            self.schema_type = NewDimension
-            return self
