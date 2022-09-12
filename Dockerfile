@@ -27,6 +27,14 @@ RUN poetry export --format requirements.txt --output /requirements.txt --without
 RUN ${VENV_PIP} install --requirement /requirements.txt
 RUN ${VENV_PIP} install poetry
 
+# The install from requirements.txt is cirumventing the pin to cacheControl 0.12.6 as it lacks
+# sufficiant dependency resolution (something somewhere is bumping us to 0.12.11).
+# Unfortunetly when the "poetry install" in the ENTRYPOINT tries to resolve this on Jenkins it errors
+# while attempting the downgrade of 0.12.11 -> 0.12.6.
+# As a work around we're directly uninstalling cachecontrol (0.12.11) here with the venv
+# pip - poetry in the ENTRYPOINT will then install the required version.
+RUN ${VENV_PIP} uninstall cachecontrol -y
+
 # Patch behave
 RUN patch -Nf -d "${VENV_PATH}/lib/python3.9/site-packages/behave/formatter" -p1 < /cucumber-format.patch
 

@@ -1,0 +1,207 @@
+{
+    "$schema": "http://gss-cogs.github.io/family-schemas/dataset-schema-1.1.0.json",
+    "id": "datatypes-fixture-dataset",
+    "title": "Dataset for testing datatypes",
+    "publisher": "Office for National Statistics",
+    "description": "Dataset for testing",
+    "landingPage": "https://not-really",
+    "datasetNotes": [
+        "On landing page"
+    ],
+    "published": "2020-09-10",
+    "families": [
+        "Trade"
+    ],
+    "extract": {
+        "source": "XLS"
+    },
+    "transform": {
+        "airtable": "reccWyv9zlS3Qx6ZC",
+        "stage": [
+            "To Do"
+        ],
+        "main_issue": 84,
+        "columns": {
+            "Dim-0": {
+                "type": "dimension",
+                "new": {
+                    "label": "Dim-0 Label",
+                    "codelist": true
+                }
+            },
+            "Dim-1": {
+                "type": "dimension",
+                "new": {
+                    "label": "Dim-1 Label",
+                    "codelist": true
+                }
+            },
+            "Dim-2": {
+                "type": "dimension",
+                "new": {
+                    "label": "Dim-2 Label",
+                    "codelist": true
+                }
+            },
+            "Attr-anyURI": {
+                "type": "attribute",
+                "new": {
+                    "label": "anyURI attribute",
+                    "literalValuesDataType": "anyURI"
+                }
+            },
+            "Attr-boolean": {
+                "type": "attribute",
+                "new": {
+                    "label": "boolean attribute",
+                    "literalValuesDataType": "boolean"
+                }
+            },
+            "Attr-decimal": {
+                "type": "attribute",
+                "new": {
+                    "label": "decimal attribute",
+                    "literalValuesDataType": "decimal"
+                }
+            },
+            "Attr-integer": {
+                "type": "attribute",
+                "new": {
+                    "label": "integer attribute",
+                    "literalValuesDataType": "integer"
+                }
+            },
+            "Attr-long": {
+                "type": "attribute",
+                "new": {
+                    "label": "long attribute",
+                    "literalValuesDataType": "long"
+                }
+            },
+            "Attr-int": {
+                "type": "attribute",
+                "new": {
+                    "label": "int attribute",
+                    "literalValuesDataType": "int"
+                }
+            },
+            "Attr-short": {
+                "type": "attribute",
+                "new": {
+                    "label": "short attribute",
+                    "literalValuesDataType": "short"
+                }
+            },
+            "Attr-nonNegativeInteger": {
+                "type": "attribute",
+                "new": {
+                    "label": "nonNegativeInteger attribute",
+                    "literalValuesDataType": "nonNegativeInteger"
+                }
+            },
+            "Attr-positiveInteger": {
+                "type": "attribute",
+                "new": {
+                    "label": "positiveInteger attribute",
+                    "literalValuesDataType": "positiveInteger"
+                }
+            },
+            "Attr-unsignedLong": {
+                "type": "attribute",
+                "new": {
+                    "label": "unsignedLong attribute",
+                    "literalValuesDataType": "unsignedLong"
+                }
+            },
+            "Attr-unsignedInt": {
+                "type": "attribute",
+                "new": {
+                    "label": "unsignedInt attribute",
+                    "literalValuesDataType": "unsignedInt"
+                }
+            },
+            "Attr-unsignedShort": {
+                "type": "attribute",
+                "new": {
+                    "label": "unsignedShort attribute",
+                    "literalValuesDataType": "unsignedShort"
+                }
+            },
+            "Attr-nonPositiveInteger": {
+                "type": "attribute",
+                "new": {
+                    "label": "nonPositiveInteger attribute",
+                    "literalValuesDataType": "nonPositiveInteger"
+                }
+            },
+            "Attr-negativeInteger": {
+                "type": "attribute",
+                "new": {
+                    "label": "negativeInteger attribute",
+                    "literalValuesDataType": "negativeInteger"
+                }
+            },
+            "Attr-double": {
+                "type": "attribute",
+                "new": {
+                    "label": "double attribute",
+                    "literalValuesDataType": "double"
+                }
+            },
+            "Attr-float": {
+                "type": "attribute",
+                "new": {
+                    "label": "float attribute",
+                    "literalValuesDataType": "float"
+                }
+            },
+            "Attr-string": {
+                "type": "attribute",
+                "new": {
+                    "label": "string attribute",
+                    "literalValuesDataType": "string"
+                }
+            },
+            "Attr-language": {
+                "type": "attribute",
+                "new": {
+                    "label": "language attribute",
+                    "literalValuesDataType": "language"
+                }
+            },
+            "Attr-date": {
+                "type": "attribute",
+                "new": {
+                    "label": "date attribute",
+                    "literalValuesDataType": "date"
+                }
+            },
+            "Attr-dateTime": {
+                "type": "attribute",
+                "new": {
+                    "label": "dateTime attribute",
+                    "literalValuesDataType": "dateTime"
+                }
+            },
+            "Attr-dateTimeStamp": {
+                "type": "attribute",
+                "new": {
+                    "label": "dateTimeStamp attribute",
+                    "literalValuesDataType": "dateTimeStamp"
+                }
+            },
+            "Attr-time": {
+                "type": "attribute",
+                "new": {
+                    "label": "time attribute",
+                    "literalValuesDataType": "time"
+                }
+            },
+            "Value": {"type": "observations", "datatype": "integer"},
+            "Measure": {"type": "measures", "new": true},
+            "Units": {"type": "units", "new": true}
+        }
+    },
+    "sizingNotes": "",
+    "notes": ""
+}
