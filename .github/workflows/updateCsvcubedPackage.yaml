@@ -11,9 +11,8 @@ jobs:
     name: updating_csvcubed_packge
     runs-on: ubuntu-latest 
     steps:
-      - name: Checkout
+      - name: Checking csvcubed pypi package version
         run: |
-            apt-get install -y jq
             pythonPackage=csvcubed;curl -Ls https://pypi.org/pypi/$pythonPackage/json | declare -x VERSION=$(jq -r .info.version)
             echo "package.json version is $VERSION"
   
