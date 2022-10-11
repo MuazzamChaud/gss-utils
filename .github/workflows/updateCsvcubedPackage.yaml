@@ -12,10 +12,10 @@ jobs:
     name: Check python requirements file and update
     steps:
       - name: Checkout
-        script:
-          - apt-get install -y jq
-          - pythonPackage=csvcubed;curl -Ls https://pypi.org/pypi/$pythonPackage/json | declare -x VERSION=$(jq -r .info.version)
-          - echo "package.json version is $VERSION"
+        run: |
+            apt-get install -y jq
+            pythonPackage=csvcubed;curl -Ls https://pypi.org/pypi/$pythonPackage/json | declare -x VERSION=$(jq -r .info.version)
+            echo "package.json version is $VERSION"
   updating_csvcubed_packge:
     name: Create branch to hold new updated csvcubed package
     steps:
