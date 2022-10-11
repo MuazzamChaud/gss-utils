@@ -25,5 +25,5 @@ jobs:
           branch: 'csvcubed_package_update'
           sha: '${{ github.event.pull_request.head.sha }}'
       
-      - name: Updating csvcubed pypi package version to latest
-      - name: creating PR for new branch 'csvcubed_package_update'
+      # - name: Updating csvcubed pypi package version to latest
+      # - name: creating PR for new branch 'csvcubed_package_update'
