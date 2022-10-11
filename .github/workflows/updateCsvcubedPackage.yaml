@@ -7,8 +7,8 @@ on:
       - 'MuazzamChaud/issue527'
 
 jobs:
+  runs-on: ubuntu-latest  
   check_dep:
-    runs-on: ubuntu-latest
     name: Check python requirements file and update
     steps:
       - name: Checkout
