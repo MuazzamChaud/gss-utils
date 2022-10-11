@@ -16,9 +16,7 @@ jobs:
             sudo apt-get update 
             sudo apt-get install jq
             pythonPackage=csvcubed;curl -Ls https://pypi.org/pypi/$pythonPackage/json >> package.json
-            cat package.json
-            declare -x VERSION=$(jq -r '.version[]' package.json)
-            echo "package.json version is $VERSION"
+            jq -r '.*[]' <new.json
   
       - name: Creating new branch 'csvcubed_package_update'
         uses: peterjgrainger/action-create-branch@v2.2.0
