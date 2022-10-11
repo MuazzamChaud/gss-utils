@@ -1,0 +1,17 @@
+name: updateCsvcubedPackage
+on:
+  # repository_dispatch:
+  #   types: [on-demand-test]
+  push:
+    branches:
+      - 'MuazzamChaud/issue527'
+
+jobs:
+  updating_csvcubed_packge:
+    steps:
+    - uses: peterjgrainger/action-create-branch@v2.2.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        branch: 'csvcubed_package_update'
+        sha: '${{ github.event.pull_request.head.sha }}'
