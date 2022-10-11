@@ -14,8 +14,9 @@ jobs:
       - name: Checking csvcubed pypi package version
         run: |
             sudo apt-get install jq
-            pythonPackage=csvcubed;curl -Ls https://pypi.org/pypi/$pythonPackage/json || declare -x VERSION=$(jq -r .version)
-            echo "package.json version is $VERSION"
+            pythonPackage=csvcubed;curl -Ls https://pypi.org/pypi/$pythonPackage/json || (jq -r .version) > ./temp_csvcubed_version_history
+            cat > ./temp_csvcubed_version_history
+            echo "package.json version is"
   
       - name: Creating new branch 'csvcubed_package_update'
         uses: peterjgrainger/action-create-branch@v2.2.0
