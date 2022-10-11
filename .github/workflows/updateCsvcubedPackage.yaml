@@ -15,7 +15,7 @@ jobs:
         run: |
             sudo apt-get update 
             sudo apt-get install jq
-            pythonPackage=csvcubed;curl -Ls https://pypi.org/pypi/$pythonPackage/json 
+            pythonPackage=csvcubed;curl -Ls https://pypi.org/pypi/$pythonPackage/json >> package.json
             declare -x VERSION=$(jq -r '.releases' package.json)
             echo "package.json version is $VERSION"
   
