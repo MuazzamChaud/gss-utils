@@ -13,13 +13,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Check requirements.txt
+      - name: Check pyproject.toml
         uses: Verbalinsurection/track-pypi-version@1.1.0
         id: checkr
         with:
           compush: 'true'
           backup: 'false'
-          reqfile: './requirements.txt'
+          reqfile: './pyproject.toml'
       - name: Get if update needed output
         run: echo ${{ steps.checkr.outputs.commit }}
   updating_csvcubed_packge:
