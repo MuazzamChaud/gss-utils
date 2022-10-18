@@ -19,7 +19,6 @@ jobs:
             LATEST_VERSION=$(curl -s https://pypi.org/pypi/$pythonPackage/json | jq -r .info.version)
             PREVIOUS_VERSIONS=$(curl -s https://pypi.org/pypi/$pythonPackage/json | jq -r '.[0:10] | .[]')
             echo "Latest package version is: $LATEST_VERSION"
-            echo "Previous package versions are: $PREVIOUS_VERSIONS"
             for i in $PREVIOUS_VERSIONS
             do
               STORY=$(curl -s https://pypi.org/pypi/$pythonPackage/item/$i.json)
