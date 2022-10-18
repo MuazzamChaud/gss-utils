@@ -20,6 +20,10 @@ jobs:
             LATEST_VERSION=$(curl -s https://pypi.org/pypi/$pythonPackage/json | jq -r .info.version)
             PREVIOUS_VERSIONS=$(curl -s https://pypi.org/pypi/$pythonPackage/json | jq -r .releases[])
             echo "Latest package version is: $LATEST_VERSION"
+            for i in $PREVIOUS_VERSIONS
+            do
+              echo "Releases: $i"
+            done
 
       - name: Creating new branch 'csvcubed_package_update'
         uses: peterjgrainger/action-create-branch@v2.2.0
