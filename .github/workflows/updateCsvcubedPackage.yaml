@@ -16,6 +16,8 @@ jobs:
         with:
         files: pyproject.toml
         branch: ${{ refs/heads/master || master }}
+
+      - name: Checking pyproject.toml
         run: cat pyproject.toml
 
       - name: Checking csvcubed pypi package version
