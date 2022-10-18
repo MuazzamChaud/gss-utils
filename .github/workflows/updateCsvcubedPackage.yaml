@@ -14,8 +14,7 @@ jobs:
       - name: Checkout files
         uses: Bhacaz/checkout-files@v2
         with:
-        branch: ${{ refs/heads/master || master }}
-        files: pyproject.toml
+        files: pyproject.toml ${{ refs/heads/master || master }}
 
       - name: Checking pyproject.toml
         run: cat pyproject.toml
