@@ -23,9 +23,8 @@ jobs:
             TOP_10_STORIES=$(curl -s https://pypi.org/pypi/$pythonPackage/json | jq -r '.[0:10] | .[]')
             for i in $TOP_10_STORIES
             do
-              STORY=$(curl -s https://pypi.org/pypi/$pythonPackage/item/$i.json)
-              echo "Previous package versions: $(echo $STORY | jq -r .releases)"
-              echo "------------"
+              echo "Previous package versions: $(echo $TOP_10_STORIES | jq -r .releases)"
+              echo "$(i)"
             done
 
       - name: Creating new branch 'csvcubed_package_update'
