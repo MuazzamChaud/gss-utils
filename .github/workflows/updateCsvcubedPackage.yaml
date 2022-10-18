@@ -1,5 +1,8 @@
 name: updateCsvcubedPackage
 on: workflow_dispatch
+  # push:
+  #   branches:
+  #     - 'MuazzamChaud/issue527'
 
 jobs: 
   updating_csvcubed_packge:
