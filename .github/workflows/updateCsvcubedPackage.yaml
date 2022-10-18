@@ -17,7 +17,10 @@ jobs:
           files: pyproject.toml 
 
       - name: Checking contents of pyproject.toml
-        run: cat pyproject.toml
+        run: | 
+          cat pyproject.toml
+          CSVCUBED_VERSION := $(shell sed -n 's/^ *csvcubed.*=.*"\([^"]*\)".*/\1/p' pyproject.toml)
+          echo "Csvcubed version: $CSVCUBED_VERSION"
 
       - name: Checking csvcubed pypi package version
         run: |
