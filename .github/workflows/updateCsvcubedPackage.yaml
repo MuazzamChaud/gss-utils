@@ -18,7 +18,7 @@ jobs:
 
       - name: Checking contents of pyproject.toml
         run: | 
-          CSVCUBED_VERSION=$(sed -n 's/^ *csvcubed.*=.*' pyproject.toml)
+          CSVCUBED_VERSION=$(sed -n 's/^ *csvcubed=.*"\([^"]*\)".*/\1/p' pyproject.toml)
           echo "Csvcubed version: $CSVCUBED_VERSION"
 
       - name: Checking csvcubed pypi package version
@@ -27,9 +27,9 @@ jobs:
             sudo apt-get install jq
             pythonPackage=csvcubed;curl -Ls https://pypi.org/pypi/$pythonPackage/json >> package.json
             LATEST_VERSION=$(curl -s https://pypi.org/pypi/$pythonPackage/json | jq -r .info.version)
-            PREVIOUS_VERSIONS=$(curl -s https://pypi.org/pypi/$pythonPackage/json | jq -r '.releases | keys')
+            ALL_VERSIONS=$(curl -s https://pypi.org/pypi/$pythonPackage/json | jq -r '.releases | keys')
             echo "Latest package version is: $LATEST_VERSION"
-            for i in $PREVIOUS_VERSIONS
+            for i in $ALL_VERSIONS
             do
               echo "Releases: $i"
             done
