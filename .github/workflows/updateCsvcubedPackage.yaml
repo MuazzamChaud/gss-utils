@@ -26,12 +26,14 @@ jobs:
             sudo apt-get install jq
             pythonPackage=csvcubed;curl -Ls https://pypi.org/pypi/$pythonPackage/json >> package.json
             LATEST_VERSION=$(curl -s https://pypi.org/pypi/$pythonPackage/json | jq -r .info.version)
-            PREVIOUS_VERSIONS=$(curl -s https://pypi.org/pypi/$pythonPackage/json | jq -r keys(releases))
+            PREVIOUS_VERSIONS=$(curl -s https://pypi.org/pypi/$pythonPackage/json | jq -r keys(@))
             echo "Latest package version is: $LATEST_VERSION"
             for i in $PREVIOUS_VERSIONS
             do
               echo "Releases: $i"
             done
+
+      # - name: Comparing current package version to latest version
 
       - name: Creating new branch 'csvcubed_package_update'
         uses: peterjgrainger/action-create-branch@v2.2.0
