@@ -11,6 +11,13 @@ jobs:
     name: updating_csvcubed_packge
     runs-on: ubuntu-latest 
     steps:
+      - name: Checkout files
+        uses: Bhacaz/checkout-files@v2
+        with:
+        files: pyproject.toml
+        branch: ${{ refs/heads/master || master }}
+        run: cat pyproject.toml
+
       - name: Checking csvcubed pypi package version
         run: |
             sudo apt-get update 
