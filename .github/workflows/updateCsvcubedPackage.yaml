@@ -11,14 +11,6 @@ jobs:
     name: updating_csvcubed_packge
     runs-on: ubuntu-latest 
     steps:
-      - name: Checkout files
-        uses: Bhacaz/checkout-files@v2
-        with:
-          branch: ${{ github.head_ref || master }}
-          files: pyproject.toml 
-
-      - name: Checking pyproject.toml
-        run: cat pyproject.toml
 
       - name: Checking csvcubed pypi package version
         run: |
@@ -26,13 +18,8 @@ jobs:
             sudo apt-get install jq
             pythonPackage=csvcubed;curl -Ls https://pypi.org/pypi/$pythonPackage/json >> package.json
             LATEST_VERSION=$(curl -s https://pypi.org/pypi/$pythonPackage/json | jq -r .info.version)
-            PREVIOUS_VERSIONS=$(curl -s https://pypi.org/pypi/$pythonPackage/json | jq -r '.[0:10] | .[]')
+            PREVIOUS_VERSIONS=$(curl -s https://pypi.org/pypi/$pythonPackage/json | jq -r .releases.[])
             echo "Latest package version is: $LATEST_VERSION"
-            for i in $PREVIOUS_VERSIONS
-            do
-              STORY=$(curl -s https://pypi.org/pypi/$pythonPackage/item/$i.json)
-              echo "Releases: $(echo $STORY | jq -r .releases)"
-            done
 
       - name: Creating new branch 'csvcubed_package_update'
         uses: peterjgrainger/action-create-branch@v2.2.0
