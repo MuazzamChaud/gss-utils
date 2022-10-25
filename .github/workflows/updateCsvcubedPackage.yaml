@@ -1,0 +1,55 @@
+name: updateCsvcubedPackage
+on: workflow_dispatch
+  # push:
+  #   branches:
+  #     - 'MuazzamChaud/issue527'
+
+jobs: 
+  updating_csvcubed_packge:
+    name: updating_csvcubed_packge
+    runs-on: ubuntu-latest 
+    steps:
+      - name: Checkout files
+        uses: Bhacaz/checkout-files@v2
+        with:
+          files: pyproject.toml 
+
+      - name: Checking contents of pyproject.toml
+        run: | 
+          CURRENT_CSVCUBED_VERSION=$(sed -n 's/^ *csvcubed\s*=.*"\([^"]*\)".*/\1/p' pyproject.toml)
+          echo "Csvcubed version: $CURRENT_CSVCUBED_VERSION"
+
+      - name: Checking csvcubed pypi package version
+        run: |
+            sudo apt-get update 
+            sudo apt-get install jq
+            pythonPackage=csvcubed;curl -Ls https://pypi.org/pypi/$pythonPackage/json >> package.json
+            LATEST_VERSION=$(curl -s https://pypi.org/pypi/$pythonPackage/json | jq -r .info.version)
+            echo "Latest package version is: $LATEST_VERSION"
+          # ALL_VERSIONS=$(curl -s https://pypi.org/pypi/$pythonPackage/json | jq -r '.releases | keys')
+          # for i in $ALL_VERSIONS
+          # do
+          #   echo "Releases: $i"
+          # done
+
+    #  - name: Comparing current package version to latest version
+    #     id: Comparison
+    #     run: |
+    #       if [ CURRENT_CSVCUBED_VERSION = LATEST_VERSION]
+    #       then
+    #       echo "csvcubed package is up to date"
+    #       fi
+
+      - name: Creating new branch 'csvcubed_package_update_$CURRENT_CSVCUBED_VERSION'
+        # if: [CURRENT_CSVCUBED_VERSION != LATEST_VERSION]
+        uses: peterjgrainger/action-create-branch@v2.2.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          branch: 'csvcubed_package_update'
+          sha: '${{ github.event.pull_request.head.sha }}'
+      
+      - name: Updating csvcubed pypi package version to latest
+        run: |
+
+      # - name: creating PR for new branch 'csvcubed_package_update'
