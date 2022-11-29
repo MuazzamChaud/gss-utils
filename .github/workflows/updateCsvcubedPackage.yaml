@@ -1,8 +1,9 @@
 name: updateCsvcubedPackage
-on: workflow_dispatch
-  # push:
-  #   branches:
-  #     - 'MuazzamChaud/issue527'
+on: 
+ workflow_dispatch:
+#   push:
+#     branches:
+#       - 'MuazzamChaud/issue527'
 
 jobs: 
   updating_csvcubed_packge:
@@ -10,14 +11,18 @@ jobs:
     runs-on: ubuntu-latest 
     steps:
       - name: Checkout files
-        uses: Bhacaz/checkout-files@v2
+        uses: actions/checkout@v3
         with:
-          files: pyproject.toml 
+          fetch-depth: 0
+
+      - name: Checkout files 2
+        run: git clone 'https://csvcubed:${{ secrets.CSVCUBED_GIT_COMMIT_TOKEN }}@github.com/GSS-Cogs/gss-utils.git' --depth 1
 
       - name: Checking contents of pyproject.toml
         run: | 
           CURRENT_CSVCUBED_VERSION=$(sed -n 's/^ *csvcubed\s*=.*"\([^"]*\)".*/\1/p' pyproject.toml)
           echo "Csvcubed version: $CURRENT_CSVCUBED_VERSION"
+          echo "CURRENT_CSVCUBED_VERSION=$CURRENT_CSVCUBED_VERSION" >> $GITHUB_ENV
 
       - name: Checking csvcubed pypi package version
         run: |
@@ -26,28 +31,37 @@ jobs:
             pythonPackage=csvcubed;curl -Ls https://pypi.org/pypi/$pythonPackage/json >> package.json
             LATEST_VERSION=$(curl -s https://pypi.org/pypi/$pythonPackage/json | jq -r .info.version)
             echo "Latest package version is: $LATEST_VERSION"
-          # ALL_VERSIONS=$(curl -s https://pypi.org/pypi/$pythonPackage/json | jq -r '.releases | keys')
-          # for i in $ALL_VERSIONS
-          # do
-          #   echo "Releases: $i"
-          # done
+            echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
+            
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      
+      - name: creating new branch and updating csvcubed
+        run: |
+          if [ ${{ env.CURRENT_CSVCUBED_VERSION }} != ${{ env.LATEST_VERSION }} ]
+          then
 
-    #  - name: Comparing current package version to latest version
-    #     id: Comparison
-    #     run: |
-    #       if [ CURRENT_CSVCUBED_VERSION = LATEST_VERSION]
-    #       then
-    #       echo "csvcubed package is up to date"
-    #       fi
+            python3 -m ensurepip
+            python3 -m pip install --upgrade pip
+            python3 -m pip install poetry
+            git checkout "master"
+            git checkout -b "csvcubed_package_update_${{ env.LATEST_VERSION }}"
 
-      - name: Creating new branch 'csvcubed_package_update'
-        # if: steps.Comparison.outcome == 'success'
-        uses: peterjgrainger/action-create-branch@v2.2.0
+            git config --global user.email "csvcubed@gsscogs.uk"
+            git config --global user.name "csvcubed Version Updater"
+
+            
+            sed -i 's/^csvcubed =.*$/csvcubed = "${{ env.LATEST_VERSION }}"/g' pyproject.toml
+            poetry lock --no-update
+
+            git add pyproject.toml poetry.lock
+            git commit -m "Updating csvcubed to ${{ env.LATEST_VERSION }}"
+            git push --set-upstream origin "csvcubed_package_update_${{ env.LATEST_VERSION }}" 
+
+          fi
+     
+      - name: creating PR for new branch
+        run: gh pr create -t "Updating csvcubed pacakage to ${{ env.LATEST_VERSION }}" -b "This branch has the csvcubed package updated to version ${{ env.LATEST_VERSION }}" -H "csvcubed_package_update_${{ env.LATEST_VERSION }}" -B "master"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          branch: 'csvcubed_package_update'
-          sha: '${{ github.event.pull_request.head.sha }}'
-      
-      # - name: Updating csvcubed pypi package version to latest
-      # - name: creating PR for new branch 'csvcubed_package_update'
